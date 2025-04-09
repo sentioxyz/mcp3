@@ -1,0 +1,25 @@
+{
+  "name": "mcp3",
+  "version": "1.0.0",
+  "description": "Web3 Model Context Protocol Server",
+  "private": true,
+  "scripts": {
+    "build": "pnpm -r build",
+    "dev": "pnpm -r dev",
+    "clean": "pnpm -r clean"
+  },
+  "keywords": [
+    "blockchain",
+    "mcp",
+    "monorepo"
+  ],
+  "author": "",
+  "license": "ISC",
+  "engines": {
+    "node": ">=18",
+    "pnpm": ">=8"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2"
+  }
+}
