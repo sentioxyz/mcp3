@@ -38,6 +38,9 @@ export function register(server: McpServer, options: any) {
   * Convert timestamps to human-readable dates
   * Format large numbers with appropriate decimal places
 
+## 6. Call Sui RPC Node api if need more data on chain
+- get the rpc api spec from https://github.com/MystenLabs/sui/blob/main/crates/sui-open-rpc/spec/openrpc.json
+- the rpc endpoint is ${options.nodeUrl}
 `},
             ]
         };
