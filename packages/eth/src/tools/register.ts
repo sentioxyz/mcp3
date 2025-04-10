@@ -1,5 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { registerFetchJSONTool } from '@mcp3/common';
+import { registerFetchTool } from '@mcp3/common';
 import { registerAbiTool } from "./abi-tool.js";
 import { registerDownloadCodeTool } from "./download-code-tool.js";
 import { registerInvokeTool } from "./invoke-tool.js";
@@ -30,7 +30,7 @@ export function registerTools(server: McpServer, basePath: string, scope: string
             if (fs.existsSync(abiFile)) {
                 output.abi = JSON.parse(fs.readFileSync(abiFile, 'utf-8'))
             }
-            
+
             return ({
                 contents: [
                     {
@@ -43,6 +43,6 @@ export function registerTools(server: McpServer, basePath: string, scope: string
         })
     }
 
-    // Register fetch-json tool from common package
-    registerFetchJSONTool(server);
+    // Register fetch tool from common package
+    registerFetchTool(server);
 }

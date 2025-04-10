@@ -4,7 +4,7 @@ import chalk from 'chalk'
 import process from 'process'
 import path from 'path'
 import fs from 'fs-extra'
-import fetch from 'node-fetch'
+import { fetch } from '@mcp3/common'
 import {AptosChainId, ChainId, StarknetChainId, SuiChainId, EthChainInfo, ExplorerApiType} from '@sentio/chain'
 import {RpcProvider as Starknet, constants} from 'starknet'
 
@@ -127,7 +127,11 @@ export async function getABI(
             ethApi = `${ethApi}/api?`
         }
 
-        let resp = (await (await fetch(`${ethApi}module=contract&action=getabi&address=${address}`)).json()) as any
+        let response = await fetch({
+            url: `${ethApi}module=contract&action=getabi&address=${address}`,
+            method: 'GET'
+        })
+        let resp = response.data as any
         if (resp.status !== '1') {
             if (resp.result?.startsWith('Contract source code not verified')) {
                 throw Error(resp.result + "(API can't retrieve ABI based on similar contract)")
@@ -138,7 +142,11 @@ export async function getABI(
 
         if (!name) {
             await new Promise((resolve) => setTimeout(resolve, 10000))
-            resp = (await (await fetch(`${ethApi}module=contract&action=getsourcecode&address=${address}`)).json()) as any
+            let response = await fetch({
+                url: `${ethApi}module=contract&action=getsourcecode&address=${address}`,
+                method: 'GET'
+            })
+            resp = response.data as any
             if (resp.status !== '1') {
                 throw Error(resp.message)
             }

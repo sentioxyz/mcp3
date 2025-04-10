@@ -1,4 +1,4 @@
-import fetch from "node-fetch";
+import { fetch } from '@mcp3/common';
 import process from "process";
 import {ChainId} from "@sentio/chain";
 import path from "path";
@@ -25,7 +25,11 @@ export async function downloadCodes(baseDir: string, chain: ChainId, contractAdd
     }
 
     const url = `${ethApi}module=contract&action=getsourcecode&address=${contractAddress}`;
-    let resp = (await (await fetch(url)).json()) as any
+    let response = await fetch({
+        url,
+        method: 'GET'
+    })
+    let resp = response.data as any
     if (resp.status !== '1') {
         if (resp.result?.startsWith('Contract source code not verified')) {
             throw Error(resp.result + "(API can't retrieve ABI based on similar contract)")

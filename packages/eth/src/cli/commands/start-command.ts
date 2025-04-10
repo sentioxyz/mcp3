@@ -16,12 +16,12 @@ export function configureStartCommand(program: Command): void {
                 // Get base path from global options
                 const basePath = cmd.parent.opts().basePath;
 
-                console.log(chalk.blue(`Starting MCP server with scope: ${options.scope}...`));
+                console.error(chalk.blue(`Starting MCP server with scope: ${options.scope}...`));
 
                 // Start the MCP server
                 await serve(options.scope, basePath);
 
-                console.log(chalk.green('MCP server started successfully'));
+                console.error(chalk.green('MCP server started successfully'));
             } catch (error: any) {
                 console.error(chalk.red(`Failed to start MCP server: ${error.message || error}`));
                 process.exit(1);

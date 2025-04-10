@@ -9,7 +9,7 @@ import { parseFn } from '../utils.js';
  */
 export function registerViewCommand(program: Command) {
     program
-        .command('view')
+        .command('call-view')
         .description('Call a view function for a given address')
         .argument('<package_module>', 'The module (eg. 0x2::foo:bar) to call the function for')
         .argument('<fn_and_params>', 'The name of the function and parameters to call (e.g., "function(arg1,arg2)" or "function<T0,T1>(arg1,arg2)")')

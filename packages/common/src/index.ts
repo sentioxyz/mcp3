@@ -1,8 +1,8 @@
 // Export HTTP utilities
-export { fetchJSON, HttpError, type FetchJSONOptions, type HttpMethod } from './http.js';
+export { fetch, HttpError, type FetchOptions, type HttpMethod, type FetchResponse } from './http.js';
 
 // Export MCP tools
-export { registerFetchJSONTool } from './tools/fetch-json.js';
+export { registerFetchTool } from './tools/fetch.js';
 
 // Add validation utilities
 export function validateAddressFormat(address: string): void {

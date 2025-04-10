@@ -25,7 +25,8 @@
   "dependencies": {
     "@mcp3/common": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.9.0",
-    "@mysten/sui.js": "^0.42.0",
+    "@mysten/sui": "~1.24.0",
+    "@typemove/sui": "^1.9.0",
     "chalk": "^4.1.2",
     "commander": "^11.1.0",
     "dotenv": "^16.3.1",

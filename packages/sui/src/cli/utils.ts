@@ -1,6 +1,6 @@
 import chalk from 'chalk';
-import { SuiMoveNormalizedType } from '@mysten/sui.js/client';
-import { normalizeSuiAddress } from "@mysten/sui.js/utils";
+import { SuiMoveNormalizedType } from '@mysten/sui/client';
+import { normalizeSuiAddress } from "@mysten/sui/utils";
 
 /**
  * Format an address for display, optionally showing the full address

@@ -1,7 +1,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import * as dotenv from 'dotenv';
-import { registerTools } from './tools/register.js';
+import { registerTools, registerProjects } from './tools/register.js';
 
 // Load environment variables
 dotenv.config();
@@ -21,6 +21,7 @@ async function startServer(options: { nodeUrl: string }) {
 
     // Register all tools
     registerTools(server, nodeUrl);
+    registerProjects(server, options);
 
     const transport = new StdioServerTransport();
     await server.connect(transport);

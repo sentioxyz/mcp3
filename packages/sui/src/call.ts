@@ -1,8 +1,11 @@
-import {SuiClient, SuiMoveNormalizedFunction, SuiMoveNormalizedType,} from '@mysten/sui.js/client'
-import {TransactionBlock} from '@mysten/sui.js/transactions'
 import * as dotenv from 'dotenv'
 import {downloadABI} from "./abi.js"
-import {normalizeSuiAddress} from "@mysten/sui.js/utils"
+
+import {defaultMoveCoder} from '@typemove/sui'
+import {SuiClient, SuiMoveNormalizedFunction, SuiMoveNormalizedType} from "@mysten/sui/client";
+import {Transaction} from '@mysten/sui/transactions'
+import {normalizeSuiAddress} from "@mysten/sui/utils"
+import {bcs, PureTypeName} from "@mysten/sui/bcs";
 
 dotenv.config()
 
@@ -15,14 +18,42 @@ export interface ViewFunctionOptions {
     typeArguments?: string[]
 }
 
+
+function formatTypeForPure(vectorType:  SuiMoveNormalizedType ): PureTypeName {
+    switch (vectorType) {
+        case 'U8':
+            return 'u8'
+        case 'U16':
+            return 'u16'
+        case 'U32':
+            return 'u32'
+        case 'U64':
+            return 'u64'
+        case 'U128':
+            return 'u128'
+        case 'U256':
+            return 'u256'
+        case 'Bool':
+            return 'bool'
+        case 'Address':
+            return 'address'
+        default:
+            // handle vector types
+            if (typeof vectorType === 'object' && vectorType !== null && 'Vector' in vectorType) {
+                return `vector<${formatTypeForPure(vectorType.Vector)}>`
+            }
+            return 'u8'
+    }
+}
+
 /**
- * Convert parameters to the right type according to the ABI
- * @param txb TransactionBlock instance
- * @param fn Function definition from the ABI
- * @param params Array of parameter values provided by the user
- * @returns Array of converted parameters ready for moveCall
+ * Convert function parameters to transaction arguments
+ * @param txb The transaction builder
+ * @param fn The function definition
+ * @param params The parameters to convert
+ * @returns An array of transaction arguments
  */
-function getArgs(txb: TransactionBlock, fn: SuiMoveNormalizedFunction, params: any[]) {
+function getArgs(txb: Transaction, fn: SuiMoveNormalizedFunction, params: any[]) {
     if (fn.parameters.length !== params.length) {
         throw new Error(`Expected ${fn.parameters.length} parameters, but got ${params.length}`)
     }
@@ -36,15 +67,14 @@ function getArgs(txb: TransactionBlock, fn: SuiMoveNormalizedFunction, params: a
             if (typeof paramType === 'object') {
                 if (('Reference' in paramType) ||
                     ('MutableReference' in paramType)) {
-                    return txb.object(param)
-                    // return txb.objectRef(txb.object(normalizeSuiAddress(param)))
+                    return txb.object(normalizeSuiAddress(param))
                 }
                 return txb.object(normalizeSuiAddress(param))
             }
 
             // For address type
             if (typeof paramType === 'string' && paramType.toLowerCase() === 'address') {
-                return txb.pure(normalizeSuiAddress(param), 'address')
+                return txb.pure.address(normalizeSuiAddress(param))
             }
         }
 
@@ -53,16 +83,21 @@ function getArgs(txb: TransactionBlock, fn: SuiMoveNormalizedFunction, params: a
             const type = paramType.toLowerCase()
             switch (type) {
                 case 'u8':
+                    return txb.pure.u8(param)
                 case 'u16':
+                    return txb.pure.u16(param)
                 case 'u32':
+                    return txb.pure.u32(param)
                 case 'u64':
+                    return txb.pure.u64(param)
                 case 'u128':
+                    return txb.pure.u128(param)
                 case 'u256':
-                    return txb.pure(Number(param), type)
+                    return txb.pure.u256(param)
                 case 'bool':
-                    return txb.pure(Boolean(param), 'bool')
+                    return txb.pure.bool(param)
                 case 'address':
-                    return txb.pure(String(param), 'address')
+                    return txb.pure.address(param)
                 default:
                     return txb.pure(param)
             }
@@ -72,18 +107,8 @@ function getArgs(txb: TransactionBlock, fn: SuiMoveNormalizedFunction, params: a
         if (typeof paramType === 'object' && paramType !== null && 'Vector' in paramType) {
             if (Array.isArray(param)) {
                 const vectorType = paramType.Vector as SuiMoveNormalizedType
-                return txb.pure(param, `vector<${formatTypeForPure(vectorType)}>`)
-            }
-        }
-
-        // Handle option types
-        if (typeof paramType === 'object' && paramType !== null && 'Option' in paramType) {
-            const optionType = paramType.Option as SuiMoveNormalizedType
-            const innerType = formatTypeForPure(optionType)
-            if (param === null || param === undefined) {
-                return txb.pure(null, `option<${innerType}>`)
-            } else {
-                return txb.pure(param, `option<${innerType}>`)
+                const innerType = formatTypeForPure(vectorType)
+                return txb.pure.vector(innerType, param)
             }
         }
 
@@ -92,140 +117,11 @@ function getArgs(txb: TransactionBlock, fn: SuiMoveNormalizedFunction, params: a
     })
 }
 
-/**
- * Format a type for use with txb.pure
- * @param type The type to format
- * @returns A string representation of the type
- */
-function formatTypeForPure(type: SuiMoveNormalizedType): string {
-    if (typeof type === 'string') {
-        return type.toLowerCase()
-    }
-
-    if (typeof type === 'object' && type !== null) {
-        if ('Vector' in type) {
-            const vectorType = type.Vector as SuiMoveNormalizedType
-            return `vector<${formatTypeForPure(vectorType)}>`
-        }
-        if ('Option' in type) {
-            const optionType = type.Option as SuiMoveNormalizedType
-            return `option<${formatTypeForPure(optionType)}>`
-        }
-        if ('Struct' in type) {
-            return `${type.Struct.address}::${type.Struct.module}::${type.Struct.name}`
-        }
-        if ('Reference' in type) {
-            const refType = type.Reference as SuiMoveNormalizedType
-            return `&${formatTypeForPure(refType)}`
-        }
-        if ('MutableReference' in type) {
-            const mutRefType = type.MutableReference as SuiMoveNormalizedType
-            return `&mut ${formatTypeForPure(mutRefType)}`
-        }
-    }
-
-    return String(type)
-}
-
-/**
- * Decode a return value based on the ABI type
- * @param value The raw return value
- * @param type The ABI type
- * @returns The decoded value
- */
-function decodeReturnValue(value: any, type: SuiMoveNormalizedType): any {
-    // If value is null or undefined, return it as is
-    if (value === null || value === undefined) {
-        return value;
-    }
-
-    // Handle primitive types
-    if (typeof type === 'string') {
-        const typeStr = type.toLowerCase();
-        if (typeStr.startsWith('u') && !isNaN(Number(typeStr.substring(1)))) {
-            // Handle unsigned integers (u8, u16, u32, u64, u128, u256)
-            if (Array.isArray(value)) {
-                // For u64, u128, u256 that come as byte arrays
-                if (typeStr === 'u64') {
-                    // Little-endian byte array to number
-                    let result = 0n;
-                    for (let i = 0; i < value.length; i++) {
-                        result += BigInt(value[i]) << BigInt(8 * i);
-                    }
-                    // Convert to string to avoid serialization issues
-                    return result.toString();
-                } else if (typeStr === 'u128' || typeStr === 'u256') {
-                    // For larger integers, use the same approach
-                    let result = 0n;
-                    for (let i = 0; i < value.length; i++) {
-                        result += BigInt(value[i]) << BigInt(8 * i);
-                    }
-                    return result.toString();
-                } else {
-                    // For smaller integers that shouldn't be arrays
-                    return Number(value.join(''));
-                }
-            }
-            return Number(value);
-        }
-        if (typeStr === 'bool') {
-            return Boolean(value);
-        }
-        if (typeStr === 'address') {
-            return String(value);
-        }
-        // For other primitive types, return as is
-        return value;
-    }
-
-    // Handle complex types
-    if (typeof type === 'object' && type !== null) {
-        // Handle vector types
-        if ('Vector' in type && Array.isArray(value)) {
-            const vectorType = type.Vector as SuiMoveNormalizedType;
-            return value.map(item => decodeReturnValue(item, vectorType));
-        }
-
-        // Handle option types
-        if ('Option' in type) {
-            if (value === null || value === undefined) {
-                return null;
-            }
-            const optionType = type.Option as SuiMoveNormalizedType;
-            return decodeReturnValue(value, optionType);
-        }
-
-        // Handle struct types
-        if ('Struct' in type && typeof value === 'object') {
-            const result: Record<string, any> = {};
-            // This is a simplified approach - in a real implementation,
-            // you would need to match the struct fields with the values
-            for (const key in value) {
-                result[key] = value[key]; // Ideally, decode each field based on its type
-            }
-            return result;
-        }
-
-        // Handle reference types
-        if ('Reference' in type) {
-            const refType = type.Reference as SuiMoveNormalizedType;
-            return decodeReturnValue(value, refType);
-        }
-
-        if ('MutableReference' in type) {
-            const mutRefType = type.MutableReference as SuiMoveNormalizedType;
-            return decodeReturnValue(value, mutRefType);
-        }
-    }
-
-    // Default fallback
-    return value;
-}
-
 export async function callViewFunction(options: ViewFunctionOptions) {
-    const {nodeUrl, packageId, module, functionName, params = [], typeArguments= []} = options
+    const {nodeUrl, packageId, module, functionName, params = [], typeArguments = []} = options
 
     const client = new SuiClient({url: nodeUrl})
+    const coder = defaultMoveCoder(options.nodeUrl)
 
     try {
         const abi = await downloadABI(options.nodeUrl, packageId)
@@ -236,13 +132,13 @@ export async function callViewFunction(options: ViewFunctionOptions) {
         }
 
         // Create a new transaction block
-        const txb = new TransactionBlock()
+        const txb = new Transaction()
 
         // Call the function
         txb.moveCall({
             typeArguments: typeArguments,
             target: `${packageId}::${module}::${functionName}`,
-            arguments: getArgs(txb, fn, params),
+            arguments: getArgs(txb, fn, params)
         })
         txb.setSender("0x0000000000000000000000000000000000000000000000000000000000000000")
         txb.setGasBudget(10000000)
@@ -256,20 +152,11 @@ export async function callViewFunction(options: ViewFunctionOptions) {
             transactionBlock: txb,
         })
 
+
         // Decode the return values if available
         if (result.results && result.results.length > 0 && result.results[0].returnValues) {
-            // Extract only the decoded values
-            const decodedValues = result.results[0].returnValues.map((returnValue, index) => {
-                const returnType = fn.return[index];
-                if (!returnType) {
-                    return returnValue;
-                }
-                return decodeReturnValue(returnValue[0], returnType);
-            });
-
-            // If there's only one return value, return it directly
-            // Otherwise, return the array of decoded values
-            return decodedValues.length === 1 ? decodedValues[0] : decodedValues;
+            const decodedResult = await coder.decodeDevInspectResult(result)
+            return decodedResult.results_decoded
         }
 
         // If there are no return values, return null

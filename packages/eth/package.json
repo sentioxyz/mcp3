@@ -4,10 +4,10 @@
   "description": "Ethereum Model Context Protocol implementation",
   "main": "build/index.js",
   "bin": {
-    "eth-mcp": "./build/cli/cli.js"
+    "eth-mcp": "./build/cli/index.js"
   },
   "scripts": {
-    "build": "tsc && chmod 755 build/cli/cli.js",
+    "build": "tsc",
     "clean": "rm -rf build"
   },
   "keywords": [],

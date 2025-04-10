@@ -9,7 +9,7 @@ import { callViewFunction } from '../call.js';
  */
 export function registerViewFunctionTool(server: McpServer, nodeUrl: string) {
     server.tool(
-        'sui-view-function',
+        'sui-call-view-function',
         {
             address: z.string().describe('The module address (e.g., 0x2::coin::CoinStore)'),
             module: z.string().describe('The module name'),

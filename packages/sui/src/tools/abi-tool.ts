@@ -1,6 +1,6 @@
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { z } from 'zod';
-import { downloadABI } from '../abi.js';
+import {McpServer} from '@modelcontextprotocol/sdk/server/mcp.js';
+import {z} from 'zod';
+import {downloadABI} from '../abi.js';
 
 /**
  * Register the sui-download-abi tool with the MCP server
@@ -19,7 +19,7 @@ export function registerAbiTool(server: McpServer, nodeUrl: string) {
                 return {
                     content: [{
                         type: 'text',
-                        text: JSON.stringify(abi, null, 2)
+                        text: JSON.stringify({modules: abi}, null, 2)
                     }]
                 };
             } catch (error) {

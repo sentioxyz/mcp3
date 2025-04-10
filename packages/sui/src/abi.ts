@@ -1,4 +1,4 @@
-import {SuiClient} from '@mysten/sui.js/client'
+import {SuiClient} from '@mysten/sui/client'
 
 
 export async function downloadABI(nodeUrl: string, objectId: string) {
