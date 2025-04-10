@@ -18,3 +18,4 @@ export { registerTools, registerProjects } from './tools/register.js';
 export { registerAbiTool } from './tools/abi-tool.js';
 export { registerViewFunctionTool } from './tools/view-function-tool.js';
 export { registerEventsTool } from './tools/events-tool.js';
+export { registerBalanceTool } from './tools/balance-tool.js';

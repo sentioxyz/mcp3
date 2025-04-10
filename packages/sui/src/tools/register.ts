@@ -3,6 +3,7 @@ import { registerFetchTool } from '@mcp3/common';
 import { registerAbiTool } from './abi-tool.js';
 import { registerViewFunctionTool } from './view-function-tool.js';
 import { registerEventsTool } from './events-tool.js';
+import { registerBalanceTool } from './balance-tool.js';
 import { register as registerNavi } from '../projects/navi/index.js';
 
 /**
@@ -15,6 +16,7 @@ export function registerTools(server: McpServer, nodeUrl: string) {
     registerAbiTool(server, nodeUrl);
     registerViewFunctionTool(server, nodeUrl);
     registerEventsTool(server, nodeUrl);
+    registerBalanceTool(server, nodeUrl);
 
     // Register fetch tool from common package
     registerFetchTool(server);

@@ -50,6 +50,10 @@ The server provides the following tools for AI assistants:
 - `sui-view-function`: Call a view function for a given address (with type arguments support)
 - `sui-download-abi`: Get the ABI for a given object ID
 - `sui-query-events`: Query events from Sui RPC
+- `sui-get-balance`: Get the balance of a specific coin type for a wallet address
+- `sui-get-all-balances`: Get all coin balances for a wallet address
+- `sui-get-coins`: Get detailed information about coins owned by a wallet address
+- `sui-get-coin-metadata`: Get metadata for a specific coin type
 
 ### CLI Usage
 
@@ -197,6 +201,36 @@ const events = await queryEvents({
   filter,
   limit: 10,
   descending: false
+});
+```
+
+#### Get Balance
+
+```typescript
+import { SuiClient } from '@mysten/sui/client';
+
+// Get balance for a specific coin type
+const client = new SuiClient({ url: 'https://fullnode.mainnet.sui.io:443' });
+const balance = await client.getBalance({
+  owner: '0x123...',
+  coinType: '0x2::sui::SUI' // Optional, defaults to SUI if not specified
+});
+
+// Get all balances for a wallet
+const allBalances = await client.getAllBalances({
+  owner: '0x123...'
+});
+
+// Get coins owned by a wallet
+const coins = await client.getCoins({
+  owner: '0x123...',
+  coinType: '0x2::sui::SUI', // Optional
+  limit: 50 // Optional
+});
+
+// Get metadata for a specific coin type
+const metadata = await client.getCoinMetadata({
+  coinType: '0x2::sui::SUI'
 });
 ```
 
