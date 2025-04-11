@@ -1,4 +1,4 @@
-import { fetch } from '@mcp3/common';
+import { httpFetch as  fetch } from '@mcp3/common';
 import process from "process";
 import {ChainId} from "@sentio/chain";
 import path from "path";

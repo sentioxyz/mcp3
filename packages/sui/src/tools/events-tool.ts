@@ -1,26 +1,22 @@
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { parseEventFilter, queryEvents } from '../events.js';
+import { Registration } from "@mcp3/common";
 
-/**
- * Register the sui-query-events tool with the MCP server
- * @param server The MCP server instance
- * @param nodeUrl The Sui RPC URL
- */
-export function registerEventsTool(server: McpServer, nodeUrl: string) {
-    server.tool(
-        'sui-query-events',
-        {
+export function registerEventsTool(registration: Registration) {
+    registration.addTool({
+        name: 'sui-query-events',
+        description: 'Query events from the Sui blockchain',
+        args: {
             filterStr: z.string().describe('Filter string in one of formats: "txId", "package::module::type"'),
             cursor: z.string().optional().describe('Pagination cursor (JSON string)'),
             limit: z.number().optional().describe('Maximum number of events to return'),
             descending: z.boolean().optional().describe('Sort events in descending order')
         },
-        async ({filterStr, cursor, limit, descending}) => {
+        callback: async ({filterStr, cursor, limit, descending}, extra) => {
             try {
                 const filter = parseEventFilter(filterStr);
                 const events = await queryEvents({
-                    nodeUrl: nodeUrl,
+                    nodeUrl: registration.serverOptions.nodeUrl,
                     filter,
                     cursor,
                     limit: limit || 50,
@@ -44,5 +40,5 @@ export function registerEventsTool(server: McpServer, nodeUrl: string) {
                 };
             }
         }
-    );
+    });
 }

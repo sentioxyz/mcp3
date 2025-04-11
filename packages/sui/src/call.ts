@@ -1,4 +1,3 @@
-import * as dotenv from 'dotenv'
 import {downloadABI} from "./abi.js"
 
 import {defaultMoveCoder} from '@typemove/sui'
@@ -7,7 +6,6 @@ import {Transaction} from '@mysten/sui/transactions'
 import {normalizeSuiAddress} from "@mysten/sui/utils"
 import {bcs, PureTypeName} from "@mysten/sui/bcs";
 
-dotenv.config()
 
 export interface ViewFunctionOptions {
     nodeUrl: string

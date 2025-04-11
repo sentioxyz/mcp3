@@ -1,23 +1,19 @@
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { SuiClient } from '@mysten/sui/client';
+import { Registration } from "@mcp3/common";
 
-/**
- * Register the sui-get-balance tool with the MCP server
- * @param server The MCP server instance
- * @param nodeUrl The Sui RPC URL
- */
-export function registerBalanceTool(server: McpServer, nodeUrl: string) {
+export function registerBalanceTool(registration: Registration) {
     // Register the tool for getting a specific coin balance
-    server.tool(
-        'sui-get-balance',
-        {
+    registration.addTool({
+        name: 'sui-get-balance',
+        description: 'Get the balance of a specific coin type for a wallet address',
+        args: {
             owner: z.string().describe('The wallet address to get the balance for'),
             coinType: z.string().optional().describe('The coin type (e.g., "0x2::sui::SUI"). Defaults to SUI if not specified.')
         },
-        async ({ owner, coinType }) => {
+        callback: async ({ owner, coinType }, extra) => {
             try {
-                const client = new SuiClient({ url: nodeUrl });
+                const client = new SuiClient({ url: registration.serverOptions.nodeUrl });
                 const balance = await client.getBalance({
                     owner,
                     coinType: coinType || null
@@ -49,17 +45,18 @@ export function registerBalanceTool(server: McpServer, nodeUrl: string) {
                 };
             }
         }
-    );
+    });
 
     // Register the tool for getting all coin balances
-    server.tool(
-        'sui-get-all-balances',
-        {
+    registration.addTool({
+        name: 'sui-get-all-balances',
+        description: 'Get all coin balances for a wallet address',
+        args: {
             owner: z.string().describe('The wallet address to get all balances for')
         },
-        async ({ owner }) => {
+        callback: async ({ owner }, extra) => {
             try {
-                const client = new SuiClient({ url: nodeUrl });
+                const client = new SuiClient({ url: registration.serverOptions.nodeUrl });
                 const balances = await client.getAllBalances({
                     owner
                 });
@@ -89,19 +86,20 @@ export function registerBalanceTool(server: McpServer, nodeUrl: string) {
                 };
             }
         }
-    );
+    });
 
     // Register the tool for getting all coins
-    server.tool(
-        'sui-get-all-coins',
-        {
+    registration.addTool({
+        name: 'sui-get-all-coins',
+        description: 'Get all coins for a wallet address',
+        args: {
             owner: z.string().describe('The wallet address to get coins for'),
             coinType: z.string().optional().describe('The coin type (e.g., "0x2::sui::SUI"). Defaults to SUI if not specified.'),
             limit: z.number().optional().describe('Maximum number of coins to return')
         },
-        async ({ owner, coinType, limit }) => {
+        callback: async ({ owner, coinType, limit }, extra) => {
             try {
-                const client = new SuiClient({ url: nodeUrl });
+                const client = new SuiClient({ url: registration.serverOptions.nodeUrl });
                 const coins = await client.getAllCoins({
                     owner,
                     limit: limit || null
@@ -128,17 +126,18 @@ export function registerBalanceTool(server: McpServer, nodeUrl: string) {
                 };
             }
         }
-    );
+    });
 
     // Register the tool for getting coin metadata
-    server.tool(
-        'sui-get-coin-metadata',
-        {
+    registration.addTool({
+        name: 'sui-get-coin-metadata',
+        description: 'Get metadata for a specific coin type',
+        args: {
             coinType: z.string().describe('The coin type (e.g., "0x2::sui::SUI")')
         },
-        async ({ coinType }) => {
+        callback: async ({ coinType }, extra) => {
             try {
-                const client = new SuiClient({ url: nodeUrl });
+                const client = new SuiClient({ url: registration.serverOptions.nodeUrl });
                 const metadata = await client.getCoinMetadata({
                     coinType
                 });
@@ -180,5 +179,5 @@ export function registerBalanceTool(server: McpServer, nodeUrl: string) {
                 };
             }
         }
-    );
+    });
 }

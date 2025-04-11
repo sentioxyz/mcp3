@@ -1,20 +1,18 @@
-import {McpServer} from '@modelcontextprotocol/sdk/server/mcp.js';
 import {z} from 'zod';
 import {downloadABI} from '../abi.js';
+import {Registration} from "@mcp3/common";
 
-/**
- * Register the sui-download-abi tool with the MCP server
- * @param server The MCP server instance
- * @param nodeUrl The Sui RPC URL
- */
-export function registerAbiTool(server: McpServer, nodeUrl: string) {
-    server.tool(
-        'sui-download-abi',
-        {
+
+export function registerAbiTool(registration: Registration) {
+    registration.addTool({
+        name: 'sui-download-abi',
+        description: 'Get the ABI for a given object ID',
+        args: {
             objectId: z.string().describe('The object ID to get the ABI for')
         },
-        async ({objectId}) => {
+        callback: async ({objectId}, extra) => {
             try {
+                const nodeUrl = registration.globalOptions.nodeUrl;
                 const abi = await downloadABI(nodeUrl, objectId);
                 return {
                     content: [{
@@ -33,5 +31,5 @@ export function registerAbiTool(server: McpServer, nodeUrl: string) {
                 };
             }
         }
-    );
+    })
 }

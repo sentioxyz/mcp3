@@ -1,22 +1,18 @@
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { callViewFunction } from '../call.js';
+import { Registration } from "@mcp3/common";
 
-/**
- * Register the sui-view-function tool with the MCP server
- * @param server The MCP server instance
- * @param nodeUrl The Sui RPC URL
- */
-export function registerViewFunctionTool(server: McpServer, nodeUrl: string) {
-    server.tool(
-        'sui-call-view-function',
-        {
+export function registerViewFunctionTool(registration: Registration) {
+    registration.addTool({
+        name: 'sui-call-view-function',
+        description: 'Call a view function on the Sui blockchain',
+        args: {
             address: z.string().describe('The module address (e.g., 0x2::coin::CoinStore)'),
             module: z.string().describe('The module name'),
             functionName: z.string().describe('The name of the function to call (e.g., "function" or "function<T0,T1>")'),
             params: z.array(z.any()).optional().describe('Parameters to pass to the function')
         },
-        async ({address, module, functionName, params}) => {
+        callback: async ({address, module, functionName, params}, extra) => {
             // Parse type arguments from function name if present
             let actualFunctionName = functionName;
             let typeArguments: string[] = [];
@@ -24,11 +20,12 @@ export function registerViewFunctionTool(server: McpServer, nodeUrl: string) {
             const typeArgsMatch = functionName.match(/^(\w+)<([^>]*)>$/);
             if (typeArgsMatch) {
                 actualFunctionName = typeArgsMatch[1];
-                typeArguments = typeArgsMatch[2].split(',').map(arg => arg.trim());
+                typeArguments = typeArgsMatch[2].split(',').map((arg: any) => arg.trim());
             }
             try {
+                const nodeUrl = registration.globalOptions.nodeUrl;
                 const result = await callViewFunction({
-                    nodeUrl: nodeUrl,
+                    nodeUrl,
                     packageId: address,
                     module,
                     functionName: actualFunctionName,
@@ -62,5 +59,5 @@ export function registerViewFunctionTool(server: McpServer, nodeUrl: string) {
                 };
             }
         }
-    );
+    });
 }

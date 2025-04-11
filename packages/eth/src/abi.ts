@@ -4,10 +4,9 @@ import chalk from 'chalk'
 import process from 'process'
 import path from 'path'
 import fs from 'fs-extra'
-import { fetch } from '@mcp3/common'
 import {AptosChainId, ChainId, StarknetChainId, SuiChainId, EthChainInfo, ExplorerApiType} from '@sentio/chain'
 import {RpcProvider as Starknet, constants} from 'starknet'
-
+import { httpFetch as  fetch } from '@mcp3/common';
 export async function downloadABI(chain: ChainId,
                                   address: string, folder: string, name?: string) {
     const abiRes = await getABI(chain, address, name)
