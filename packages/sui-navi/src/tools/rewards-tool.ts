@@ -1,6 +1,7 @@
 import {Registration} from '@mcp3/common';
 import {z} from 'zod';
 import {AccountManager, getAvailableRewards} from "navi-sdk";
+import {SuiClient} from "@mysten/sui/client";
 
 /**
  * Register the rewards tool with the Registration
@@ -16,8 +17,9 @@ export function registerRewardsTool(registration: Registration) {
         },
         callback: async ({address, options = [1]}, extra) => {
             try {
-                const account = new AccountManager()
-                const rewards = await getAvailableRewards(account.client, address, options, true, true);
+                const suiClient = new SuiClient({url: registration.globalOptions.nodeUrl});
+                // @ts-ignore
+                const rewards = await getAvailableRewards(suiClient, address, options, true, true);
 
                 return {
                     content: [{

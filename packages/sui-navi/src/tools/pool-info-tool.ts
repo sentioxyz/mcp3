@@ -1,6 +1,7 @@
 import { Registration } from '@mcp3/common';
 import { z } from 'zod';
-import { NAVISDKClient, CoinInfo } from 'navi-sdk';
+import { NAVISDKClient, CoinInfo, getPoolInfo } from 'navi-sdk';
+import {SuiClient} from "@mysten/sui/client";
 
 /**
  * Register the pool-info tool with the Registration
@@ -11,17 +12,17 @@ export function registerPoolInfoTool(registration: Registration) {
     name: 'sui-navi-pool-info',
     description: 'Get information about Navi Protocol pools',
     args: {
-      symbol: z.string().describe('Optional symbol to filter results (e.g., "SUI", "USDT", "WETH")'),
-      address: z.string().describe('Optional coin address to filter results'),
+      symbol: z.string().describe('Optional symbol to filter results (e.g., "SUI", "USDT", "WETH")').optional(),
+      address: z.string().describe('Optional coin address to filter results').optional(),
       decimal: z.number().optional().describe('Optional decimal precision for the coin')
     },
     callback: async ({ symbol, address, decimal }, extra) => {
       try {
-        const client = new NAVISDKClient({ networkType: 'mainnet' });
+        const suiClient = new SuiClient({url: registration.globalOptions.nodeUrl});
 
         let coinType: CoinInfo | undefined;
 
-        if (symbol || address) {
+        if (symbol && address) {
           coinType = {
             symbol,
             address,
@@ -29,7 +30,8 @@ export function registerPoolInfoTool(registration: Registration) {
           };
         }
 
-        const poolInfo = await client.getPoolInfo(coinType);
+        // @ts-ignore
+        const poolInfo = await getPoolInfo(coinType, suiClient);
 
         return {
           content: [{
