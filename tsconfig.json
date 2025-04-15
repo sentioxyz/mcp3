@@ -1,18 +1,28 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "skipLibCheck": true,
+    "importHelpers": true,
     "declaration": true,
-    "composite": true
-  },
-  "references": [
-    { "path": "./packages/common" },
-    { "path": "./packages/eth" },
-    { "path": "./packages/sui" }
-  ]
+    "declarationMap": true,
+    "alwaysStrict": true,
+    "sourceMap": true,
+    "target": "es2022",
+    "lib": ["ES2021.String"],
+    "esModuleInterop": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noImplicitAny": true,
+    "resolveJsonModule": true,
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "isolatedModules": true,
+    "strictNullChecks": true,
+    "stripInternal": true,
+    "noFallthroughCasesInSwitch": true,
+    "noEmitOnError": false,
+    // by pass issue: Could not find a declaration file for module 'buffer-layout' for now.
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  }
 }

@@ -1,21 +1,33 @@
-import { main } from './cli/index.js';
 
-// Check if this file is being run directly
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main();
-}
-
-// Export MCP server functionality
-export { startServer } from './server.js';
 
 // Export core functionality
+import {Registration} from "@mcp3/common";
+
 export { downloadABI } from './abi.js';
-export { callViewFunction, ViewFunctionOptions } from './call.js';
-export { queryEvents, parseEventFilter, EventQueryOptions } from './events.js';
+export { callViewFunction, type ViewFunctionOptions } from './call.js';
+export { queryEvents, parseEventFilter,type EventQueryOptions } from './events.js';
 
 // Export tool registration functions
-export { registerTools, registerProjects } from './tools/register.js';
+export { registerSUITools } from './tools/index.js';
 export { registerAbiTool } from './tools/abi-tool.js';
 export { registerViewFunctionTool } from './tools/view-function-tool.js';
 export { registerEventsTool } from './tools/events-tool.js';
 export { registerBalanceTool } from './tools/balance-tool.js';
+
+
+const availableSubProjects = [
+    '@mcp3/sui-navi'
+]
+
+export async function registerSubProjects(registration: Registration) {
+    for (const subProject of availableSubProjects) {
+        try {
+            const subProjectModule = await import(subProject);
+            subProjectModule.register(registration);
+            console.error(`Loaded subproject ${subProject}`);
+        } catch (e) {
+            // Ignore errors
+            console.error(`Subproject ${subProject} not found, skipped`);
+        }
+    }
+}

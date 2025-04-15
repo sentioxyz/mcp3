@@ -4,7 +4,7 @@
   "description": "Ethereum Model Context Protocol implementation",
   "main": "build/index.js",
   "bin": {
-    "eth-mcp": "./build/cli/index.js"
+    "mcp3-eth": "./build/cli/index.js"
   },
   "scripts": {
     "build": "tsc",
