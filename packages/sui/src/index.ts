@@ -14,8 +14,13 @@ export { registerViewFunctionTool } from './tools/view-function-tool.js';
 export { registerEventsTool } from './tools/events-tool.js';
 export { registerBalanceTool } from './tools/balance-tool.js';
 
+// Export resource registration functions
+export { registerSUIResources } from './resources/index.js';
+export { registerWalletResource } from './resources/wallet-resource.js';
+
 
 const availableSubProjects = [
+    '@mcp3/sui-wallets',
     '@mcp3/sui-navi',
     '@mcp3/sui-cetus'
 ]
