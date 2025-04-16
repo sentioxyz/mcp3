@@ -1,6 +1,6 @@
 import { Registration } from '@mcp3/common';
 import { z } from 'zod';
-import { NAVISDKClient, CoinInfo, getPoolInfo } from 'navi-sdk';
+import { CoinInfo, getPoolInfo } from 'navi-sdk';
 import {SuiClient} from "@mysten/sui/client";
 
 /**

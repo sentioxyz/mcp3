@@ -139,6 +139,9 @@ importers:
       '@mcp3/common':
         specifier: workspace:*
         version: link:../common
+      '@mcp3/sui-base':
+        specifier: workspace:*
+        version: link:../sui-base
       '@mcp3/sui-cetus':
         specifier: workspace:*
         version: link:../sui-cetus
@@ -154,9 +157,6 @@ importers:
       '@mysten/sui':
         specifier: ~1.24.0
         version: 1.24.0(typescript@5.8.3)
-      '@typemove/sui':
-        specifier: ^1.9.0
-        version: 1.9.0(typescript@5.8.3)
       chalk:
         specifier: ^5.3.0
         version: 5.4.1
@@ -195,6 +195,43 @@ importers:
         specifier: ^3.24.2
         version: 3.24.2
 
+  packages/sui-base:
+    dependencies:
+      '@mcp3/common':
+        specifier: workspace:*
+        version: link:../common
+      '@mcp3/sui-wallets':
+        specifier: workspace:*
+        version: link:../sui-wallets
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.9.0
+        version: 1.9.0
+      '@mysten/sui':
+        specifier: ~1.24.0
+        version: 1.24.0(typescript@5.8.3)
+      '@typemove/sui':
+        specifier: ^1.9.0
+        version: 1.9.0(typescript@5.8.3)
+      chalk:
+        specifier: ^5.3.0
+        version: 5.4.1
+      commander:
+        specifier: ^12.1.0
+        version: 12.1.0
+      dotenv:
+        specifier: ^16.5.0
+        version: 16.5.0
+      zod:
+        specifier: ^3.24.2
+        version: 3.24.2
+    devDependencies:
+      '@types/node':
+        specifier: ^20.8.9
+        version: 20.17.30
+      typescript:
+        specifier: ^5.2.2
+        version: 5.8.3
+
   packages/sui-cetus:
     dependencies:
       '@cetusprotocol/cetus-sui-clmm-sdk':
@@ -203,6 +240,9 @@ importers:
       '@mcp3/common':
         specifier: workspace:*
         version: link:../common
+      '@mcp3/sui-base':
+        specifier: workspace:*
+        version: link:../sui-base
       '@modelcontextprotocol/sdk':
         specifier: ^1.9.0
         version: 1.9.0
@@ -230,6 +270,9 @@ importers:
       '@mcp3/common':
         specifier: workspace:*
         version: link:../common
+      '@mcp3/sui-base':
+        specifier: workspace:*
+        version: link:../sui-base
       '@modelcontextprotocol/sdk':
         specifier: ^1.9.0
         version: 1.9.0

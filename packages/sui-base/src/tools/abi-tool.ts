@@ -2,7 +2,10 @@ import {z} from 'zod';
 import {downloadABI} from '../abi.js';
 import {Registration} from "@mcp3/common";
 
-
+/**
+ * Register the ABI tool with the Registration
+ * @param registration The Registration instance
+ */
 export function registerAbiTool(registration: Registration) {
     registration.addTool({
         name: 'sui-download-abi',
