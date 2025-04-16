@@ -2,6 +2,10 @@ import { z } from 'zod';
 import { parseEventFilter, queryEvents } from '../events.js';
 import { Registration } from "@mcp3/common";
 
+/**
+ * Register the events tool with the Registration
+ * @param registration The Registration instance
+ */
 export function registerEventsTool(registration: Registration) {
     registration.addTool({
         name: 'sui-query-events',
@@ -16,7 +20,7 @@ export function registerEventsTool(registration: Registration) {
             try {
                 const filter = parseEventFilter(filterStr);
                 const events = await queryEvents({
-                    nodeUrl: registration.serverOptions.nodeUrl,
+                    nodeUrl: registration.globalOptions.nodeUrl,
                     filter,
                     cursor,
                     limit: limit || 50,

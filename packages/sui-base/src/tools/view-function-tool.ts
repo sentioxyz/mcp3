@@ -2,6 +2,10 @@ import { z } from 'zod';
 import { callViewFunction } from '../call.js';
 import { Registration } from "@mcp3/common";
 
+/**
+ * Register the view function tool with the Registration
+ * @param registration The Registration instance
+ */
 export function registerViewFunctionTool(registration: Registration) {
     registration.addTool({
         name: 'sui-call-view-function',

@@ -1,22 +1,49 @@
-import { z } from 'zod';
-import { SuiClient } from '@mysten/sui/client';
-import { Registration } from "@mcp3/common";
+import {z} from 'zod';
+import {SuiClient} from '@mysten/sui/client';
+import {Registration} from "@mcp3/common";
+import {getDefaultWalletAddress} from "../address.js";
 
+// Define a type for the WalletManager to avoid direct import dependency
+interface WalletManagerLike {
+    getDefaultWallet(): { address: string } | null;
+    getWallet(addressOrName?: string, options?: { allowPartialMatch?: boolean, caseSensitive?: boolean }): { address: string } | null;
+}
+
+/**
+ * Register the balance tool with the Registration
+ * @param registration The Registration instance
+ */
 export function registerBalanceTool(registration: Registration) {
-    // Register the tool for getting a specific coin balance
+    // Register the get-balance tool
     registration.addTool({
         name: 'sui-get-balance',
         description: 'Get the balance of a specific coin type for a wallet address',
         args: {
-            owner: z.string().describe('The wallet address to get the balance for'),
-            coinType: z.string().optional().describe('The coin type (e.g., "0x2::sui::SUI"). Defaults to SUI if not specified.')
+            owner: z.string().optional().describe('The wallet address to check (defaults to configured wallet)'),
+            coinType: z.string().describe('The coin type to check (e.g., 0x2::sui::SUI)').optional()
         },
         callback: async ({ owner, coinType }, extra) => {
             try {
-                const client = new SuiClient({ url: registration.serverOptions.nodeUrl });
+                const client = new SuiClient({ url: registration.globalOptions.nodeUrl });
+                // Resolve the wallet address
+                const walletManager = await getDefaultWalletAddress(registration);
+                const defaultWallet = walletManager?.getDefaultWallet();
+                const walletAddress = owner ?? defaultWallet?.address;
+
+                if (!walletAddress) {
+                    return {
+                        content: [{
+                            type: 'text',
+                            text: 'No wallet address provided and no default wallet address configured.'
+                        }],
+                        isError: true
+                    };
+                }
+
+                // Get the balance
                 const balance = await client.getBalance({
-                    owner,
-                    coinType: coinType || null
+                    owner: walletAddress,
+                    coinType: coinType
                 });
 
                 // Format the balance for display
@@ -47,26 +74,44 @@ export function registerBalanceTool(registration: Registration) {
         }
     });
 
-    // Register the tool for getting all coin balances
+    // Register the get-all-balances tool
     registration.addTool({
         name: 'sui-get-all-balances',
         description: 'Get all coin balances for a wallet address',
         args: {
-            owner: z.string().describe('The wallet address to get all balances for')
+            owner: z.string().optional().describe('The wallet address to check (defaults to configured wallet)')
         },
         callback: async ({ owner }, extra) => {
             try {
-                const client = new SuiClient({ url: registration.serverOptions.nodeUrl });
+                const client = new SuiClient({ url: registration.globalOptions.nodeUrl });
+                // Resolve the wallet address
+                const walletManager = await getDefaultWalletAddress(registration);
+                const defaultWallet = walletManager?.getDefaultWallet();
+                const walletAddress = owner ?? defaultWallet?.address;
+
+                if (!walletAddress) {
+                    return {
+                        content: [{
+                            type: 'text',
+                            text: 'No wallet address provided and no default wallet address configured.'
+                        }],
+                        isError: true
+                    };
+                }
+
+                // Get all balances
                 const balances = await client.getAllBalances({
-                    owner
+                    owner: walletAddress
                 });
 
                 // Format the balances for display
                 const formattedBalances = balances.map(balance => ({
                     coinType: balance.coinType,
                     totalBalance: balance.totalBalance.toString(),
-                    // Convert to a more readable format
-                    formattedBalance: (Number(balance.totalBalance) / 1_000_000_000).toFixed(9)
+                    // Convert to a more readable format if it's SUI
+                    formattedBalance: balance.coinType === '0x2::sui::SUI' 
+                        ? (Number(balance.totalBalance) / 1_000_000_000).toFixed(9) + ' SUI'
+                        : balance.totalBalance.toString()
                 }));
 
                 return {
@@ -88,20 +133,35 @@ export function registerBalanceTool(registration: Registration) {
         }
     });
 
-    // Register the tool for getting all coins
+    // Register the get-coins tool
     registration.addTool({
-        name: 'sui-get-all-coins',
-        description: 'Get all coins for a wallet address',
+        name: 'sui-get-coins',
+        description: 'Get detailed information about coins owned by a wallet address',
         args: {
-            owner: z.string().describe('The wallet address to get coins for'),
-            coinType: z.string().optional().describe('The coin type (e.g., "0x2::sui::SUI"). Defaults to SUI if not specified.'),
+            owner: z.string().optional().describe('The wallet address to check (defaults to configured wallet)'),
+            coinType: z.string().optional().describe('The coin type to filter by (optional)'),
             limit: z.number().optional().describe('Maximum number of coins to return')
         },
         callback: async ({ owner, coinType, limit }, extra) => {
             try {
-                const client = new SuiClient({ url: registration.serverOptions.nodeUrl });
+                const client = new SuiClient({ url: registration.globalOptions.nodeUrl });
+                // Resolve the wallet address
+                const walletManager = await getDefaultWalletAddress(registration);
+                const defaultWallet = walletManager?.getDefaultWallet();
+                const walletAddress = owner ?? defaultWallet?.address;
+
+                if (!walletAddress) {
+                    return {
+                        content: [{
+                            type: 'text',
+                            text: 'No wallet address provided and no default wallet address configured.'
+                        }],
+                        isError: true
+                    };
+                }
+
                 const coins = await client.getAllCoins({
-                    owner,
+                    owner: walletAddress,
                     limit: limit || null
                 });
 
@@ -128,16 +188,16 @@ export function registerBalanceTool(registration: Registration) {
         }
     });
 
-    // Register the tool for getting coin metadata
+    // Register the get-coin-metadata tool
     registration.addTool({
         name: 'sui-get-coin-metadata',
         description: 'Get metadata for a specific coin type',
         args: {
-            coinType: z.string().describe('The coin type (e.g., "0x2::sui::SUI")')
+            coinType: z.string().describe('The coin type to get metadata for (e.g., 0x2::sui::SUI)')
         },
         callback: async ({ coinType }, extra) => {
             try {
-                const client = new SuiClient({ url: registration.serverOptions.nodeUrl });
+                const client = new SuiClient({ url: registration.globalOptions.nodeUrl });
                 const metadata = await client.getCoinMetadata({
                     coinType
                 });
@@ -147,25 +207,14 @@ export function registerBalanceTool(registration: Registration) {
                         content: [{
                             type: 'text',
                             text: `No metadata found for coin type: ${coinType}`
-                        }],
-                        isError: true
+                        }]
                     };
                 }
-
-                // Format the metadata for display
-                const formattedMetadata = {
-                    id: metadata.id,
-                    name: metadata.name,
-                    symbol: metadata.symbol,
-                    description: metadata.description,
-                    decimals: metadata.decimals,
-                    iconUrl: metadata.iconUrl || null,
-                };
 
                 return {
                     content: [{
                         type: 'text',
-                        text: JSON.stringify(formattedMetadata, null, 2)
+                        text: JSON.stringify(metadata, null, 2)
                     }]
                 };
             } catch (error) {

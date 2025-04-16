@@ -1,0 +1,13 @@
+{
+  "wallets": [
+    {
+      "address": "0xd67978d3f057d6e43eb3db9356a76ef40cdc3ddf105b06fcbf28346c0725122c",
+      "name": "Manual Test Wallet"
+    },
+    {
+      "address": "0xd95fc8b999f964f0142c98e466a6ffbc331fca85bec1d6457a8d8264c09911c7",
+      "name": "Transaction Test Wallet"
+    }
+  ],
+  "defaultWallet": "0xd95fc8b999f964f0142c98e466a6ffbc331fca85bec1d6457a8d8264c09911c7"
+}
