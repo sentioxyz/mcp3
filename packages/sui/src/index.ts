@@ -16,7 +16,8 @@ export { registerBalanceTool } from './tools/balance-tool.js';
 
 
 const availableSubProjects = [
-    '@mcp3/sui-navi'
+    '@mcp3/sui-navi',
+    '@mcp3/sui-cetus'
 ]
 
 export async function registerSubProjects(registration: Registration) {
