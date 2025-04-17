@@ -1,12 +1,14 @@
 import {
     McpServer,
+    ToolCallback,
     ReadResourceCallback,
-    ReadResourceTemplateCallback,
     ResourceMetadata,
     ResourceTemplate,
+    ReadResourceTemplateCallback,
+
 } from "@modelcontextprotocol/sdk/server/mcp.js";
 import {Command} from 'commander';
-import {z, ZodRawShape, ZodTypeAny} from "zod";
+import {z, ZodRawShape, ZodTypeAny, ZodArray} from "zod";
 import {CallToolResult} from "@modelcontextprotocol/sdk/types.js";
 import {RequestHandlerExtra} from "@modelcontextprotocol/sdk/shared/protocol.js";
 
@@ -37,7 +39,6 @@ type TemplateResource = {
 };
 
 export class Registration {
-    private static instance: Registration | null = null;
     private globalOptionsFn: (CommandFn)[] = [];
     private serveOptionsFn: (CommandFn)[] = [];
     private commandFn: (CommandFn)[] = [];
@@ -46,48 +47,12 @@ export class Registration {
     private resourceTemplates: Record<string, TemplateResource> = {};
     private _serverOptions: any;
     private _program: Command;
-    public readonly name: string;
-    public readonly description: string;
-    public readonly version: string;
 
     get serverOptions() {
         return this._serverOptions;
     }
 
-    /**
-     * Get the singleton instance of Registration
-     * @returns The Registration instance
-     */
-    public static getInstance(): Registration {
-        if (!Registration.instance) {
-            throw new Error('Registration not initialized. Call Registration.create() first.');
-        }
-        return Registration.instance;
-    }
-
-    /**
-     * Create a new Registration instance (or return the existing one)
-     * @param name The name of the registration
-     * @param description The description of the registration
-     * @param version The version of the registration
-     * @returns The Registration instance
-     */
-    public static create(name: string, description: string, version: string): Registration {
-        if (!Registration.instance) {
-            Registration.instance = new Registration(name, description, version);
-        } else {
-             throw new Error('Registration already initialized. Use Registration.getInstance() instead.');
-        }
-        return Registration.instance;
-    }
-
-    /**
-     * Private constructor to enforce singleton pattern
-     */
-    private constructor(name: string, description: string, version: string) {
-        this.name = name;
-        this.description = description;
-        this.version = version;
+    constructor(public readonly name: string, public readonly description: string, public readonly version: string) {
     }
 
     addGlobalOption(fn: CommandFn) {
@@ -226,37 +191,7 @@ export class Registration {
                         signal: controller.signal
                     });
                     if (result && result.content) {
-                        // Check if the content is an array with a single item
-                        if (Array.isArray(result.content)) {
-                            for (const item of result.content) {
-                                // Handle resource type with JSON content specially
-                                if (item.type === 'resource' &&
-                                    item.resource &&
-                                    item.resource.mimeType?.includes("json")) {
-                                    // Parse and format the JSON with error handling
-                                    let jsonData;
-                                    try {
-                                        jsonData = JSON.parse(item.resource.text as string);
-                                    } catch (parseError) {
-                                        console.error(`Failed to parse JSON for item: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
-                                        jsonData = null; // Fallback to null or handle as needed
-                                    }
-                                    const output = {
-                                        ...item,
-                                        resource: {
-                                            ...item.resource,
-                                            text: jsonData
-                                        }
-                                    }
-                                    console.log(JSON.stringify(output, null, 2));
-
-                                } else {
-                                    console.log(item);
-                                }
-                            }
-                        } else {
-                            console.log(result.content);
-                        }
+                        console.log(result.content);
                     }
                     if (result && result.isError) {
                         process.exit(1);
@@ -272,14 +207,6 @@ export class Registration {
     get globalOptions() {
         return this._program?.opts()
     }
-}
-
-/**
- * Get the singleton instance of Registration
- * @returns The Registration instance
- */
-export function getRegistration(): Registration {
-    return Registration.getInstance();
 }
 
 function getDefaults(schema: ZodTypeAny) {

@@ -2,12 +2,10 @@ import {z} from 'zod';
 import {Registration} from "@mcp3/common";
 import {Transaction} from '@mysten/sui/transactions';
 import {SuiClient} from '@mysten/sui/client';
-import {resolveWalletAddressOrThrow, transactionToResource} from '@mcp3/sui-base';
+import {toBase64} from '@mysten/sui/utils';
+import {fetchCoins, getWalletManager} from '@mcp3/sui-base';
 import {depositCoin, pool, Pool, PoolConfig, returnMergedCoins} from 'navi-sdk'
 import {getCoinInfo} from "../coin_info.js";
-
-// Re-export transactionToResource from sui-base for backward compatibility
-export {transactionToResource};
 
 /**
  * Register the Navi deposit tool with the Registration
@@ -16,7 +14,7 @@ export {transactionToResource};
 export function registerNaviDepositTool(registration: Registration) {
     registration.addTool({
         name: 'sui-navi-deposit',
-        description: 'Create a Navi deposit transaction, return the transaction bytes',
+        description: 'Create and submit a Navi deposit transaction',
         args: {
             coinType: z.string().describe('The coin type to deposit (e.g., "0x2::sui::SUI")'),
             amount: z.number().describe('The amount to deposit'),
@@ -25,15 +23,33 @@ export function registerNaviDepositTool(registration: Registration) {
         callback: async ({coinType, amount, walletAddress}, extra) => {
             try {
                 // Get a wallet manager
-                const sender = await resolveWalletAddressOrThrow(walletAddress);
+                const walletManager = await getWalletManager({
+                    nodeUrl: registration.globalOptions.nodeUrl,
+                    walletConfig: registration.globalOptions.walletConfig
+                });
+                let sender: string
+                if (walletAddress) {
+                    sender = walletManager?.getWallet(walletAddress)?.address ?? walletAddress
+                } else {
+                    sender = walletManager?.getDefaultWallet()?.address ?? ''
+                }
+                if (!sender) {
+                    return {
+                        content: [{
+                            type: 'text',
+                            text: 'No wallet address provided and no default wallet address configured.'
+                        }],
+                        isError: true
+                    };
+                }
 
                 const coinInfo = getCoinInfo(coinType);
                 if (!coinInfo) {
-                    throw new Error("Not supported coin " + coinType);
+                    throw new Error("Not supported coin "+ coinType);
                 }
 
                 // Get coin metadata to determine decimals
-                const client = new SuiClient({url: registration.globalOptions.nodeUrl});
+                const client = new SuiClient({ url: registration.globalOptions.nodeUrl });
                 const metadata = await client.getCoinMetadata({
                     coinType: coinInfo.address
                 });
@@ -67,7 +83,10 @@ export function registerNaviDepositTool(registration: Registration) {
                 return {
                     content: [{
                         type: 'resource',
-                        resource: await transactionToResource(txb, client),
+                        resource: {
+                            uri: `sui://tx/${await txb.getDigest({client})}`,
+                            blob: toBase64(await txb.build({client}))
+                        },
                     }],
                 }
 

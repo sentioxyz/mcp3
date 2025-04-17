@@ -1,42 +1,7 @@
 import {Registration} from '@mcp3/common';
 import {z} from 'zod';
-import {ConfigFileWalletPersistence, WalletInfo, WalletManager} from '../manager/index.js';
+import {ConfigFileWalletPersistence, WalletManager} from '../manager/index.js';
 
-
-/**
- * Format wallet information for display, removing sensitive data
- * @param wallet The wallet info to format
- * @param defaultWalletAddress The address of the default wallet (optional)
- * @returns Formatted wallet info without credentials
- */
-function formatWalletInfo(wallet: WalletInfo, defaultWalletAddress?: string): any {
-  return {
-    name: wallet.name,
-    address: wallet.address,
-    isDefault: defaultWalletAddress ? wallet.address === defaultWalletAddress : false,
-    hasCredentials: !!wallet.credentials,
-    hasKeypair: !!wallet.keypair
-  };
-}
-
-/**
- * Convert wallet info to a resource output for a wallet
- * @param wallet The wallet info
- * @param defaultWalletAddress The address of the default wallet (optional)
- * @returns Resource content object
- */
-export function toWalletResource(wallet: WalletInfo, defaultWalletAddress?: string): any {
-  const formattedWallet = formatWalletInfo(wallet, defaultWalletAddress);
-
-  return {
-    type: 'resource',
-    resource: {
-      uri: `sui:///wallet/${wallet.address}`,
-      mimeType: 'application/json',
-      text: JSON.stringify(formattedWallet, null, 2)
-    },
-  };
-}
 
 /**
  * Register wallet management tools with the Registration
@@ -59,8 +24,20 @@ export function registerWalletManagementTools(registration: Registration) {
         const defaultWalletInfo = walletManager.getDefaultWallet();
         const defaultWalletAddress = defaultWalletInfo?.address;
 
+        // Format wallet information for display
+        const walletInfo = wallets.map(wallet => ({
+          name: wallet.name,
+          address: wallet.address,
+          isDefault: wallet.address === defaultWalletAddress,
+          hasCredentials: !!wallet.credentials,
+          hasKeypair: !!wallet.keypair
+        }));
+
         return {
-          content: wallets.map(wallet => toWalletResource(wallet, defaultWalletAddress))
+          content: [{
+            type: 'text',
+            text: JSON.stringify(walletInfo, null, 2)
+          }]
         };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -106,18 +83,12 @@ export function registerWalletManagementTools(registration: Registration) {
 
         // Get the wallet to get its name
         const wallet = walletManager.getWallet(address);
-        const defaultWalletInfo = setDefault ? wallet : walletManager.getDefaultWallet();
-        const defaultWalletAddress = defaultWalletInfo?.address;
 
-        // Add a text message and the wallet resource
         return {
-          content: [
-            {
-              type: 'text',
-              text: `Wallet ${wallet?.name} (${address}) added successfully${setDefault ? ' and set as default' : ''}.`
-            },
-            toWalletResource(wallet!, defaultWalletAddress)
-          ]
+          content: [{
+            type: 'text',
+            text: `Wallet ${wallet?.name} (${address}) added successfully${setDefault ? ' and set as default' : ''}.`
+          }]
         };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -149,39 +120,21 @@ export function registerWalletManagementTools(registration: Registration) {
         // Get the wallet first to display its name and address in the success message
         const wallet = walletManager.getWallet(identifier);
 
-        if (!wallet) {
-          return {
-            content: [{
-              type: 'text',
-              text: `Wallet with identifier "${identifier}" not found.`
-            }],
-            isError: true
-          };
-        }
-
-        // Store wallet info before removing
-        const walletCopy = { ...wallet };
-        const defaultWalletInfo = walletManager.getDefaultWallet();
-        const defaultWalletAddress = defaultWalletInfo?.address;
-
         // Remove the wallet
         const result = walletManager.removeWallet(identifier);
 
         if (result) {
           return {
-            content: [
-              {
-                type: 'text',
-                text: `Wallet ${walletCopy.name} (${walletCopy.address}) removed successfully.`
-              },
-              toWalletResource(walletCopy, defaultWalletAddress)
-            ]
+            content: [{
+              type: 'text',
+              text: `Wallet ${wallet?.name} (${wallet?.address}) removed successfully.`
+            }]
           };
         } else {
           return {
             content: [{
               type: 'text',
-              text: `Failed to remove wallet with identifier "${identifier}".`
+              text: `Wallet with identifier "${identifier}" not found.`
             }],
             isError: true
           };
@@ -226,41 +179,24 @@ export function registerWalletManagementTools(registration: Registration) {
           persistence: filePersistence
         });
 
-        // Get the wallet first to make sure it exists
-        const wallet = walletManager.getWallet(identifier);
-
-        if (!wallet) {
-          return {
-            content: [{
-              type: 'text',
-              text: `Wallet with identifier "${identifier}" not found.`
-            }],
-            isError: true
-          };
-        }
-
         // Set the default wallet (this will automatically save to the persistence)
         const result = walletManager.setDefaultWallet(identifier);
 
         if (result) {
-          // Get the updated default wallet info
-          const defaultWalletInfo = walletManager.getDefaultWallet();
-          const defaultWalletAddress = defaultWalletInfo?.address;
+          // Get the wallet to display its name and address
+          const wallet = walletManager.getWallet(identifier);
 
           return {
-            content: [
-              {
-                type: 'text',
-                text: `Wallet ${wallet.name} (${wallet.address}) set as default.`
-              },
-              toWalletResource(wallet, defaultWalletAddress)
-            ]
+            content: [{
+              type: 'text',
+              text: `Wallet ${wallet?.name} (${wallet?.address}) set as default.`
+            }]
           };
         } else {
           return {
             content: [{
               type: 'text',
-              text: `Failed to set wallet "${identifier}" as default.`
+              text: `Wallet with identifier "${identifier}" not found.`
             }],
             isError: true
           };
@@ -359,20 +295,13 @@ export function registerWalletManagementTools(registration: Registration) {
           fs.writeFileSync(walletConfig, JSON.stringify(config, null, 2));
         }
 
-        // Get default wallet info
-        const defaultWalletInfo = walletManager.getDefaultWallet();
-        const defaultWalletAddress = defaultWalletInfo?.address;
-
         // If not saving to config, we MUST display the mnemonic or it will be lost forever
         if (!saveToConfig) {
           return {
-            content: [
-              {
-                type: 'text',
-                text: `Generated new wallet:\n\nName: ${walletInfo.name}\nAddress: ${walletInfo.address}\n\n⚠️ IMPORTANT: Since you chose not to save the wallet to a config file,\nthe mnemonic is displayed below. This is your ONLY chance to save it!\n\nMnemonic: ${mnemonic}\n\nPlease store this mnemonic phrase in a secure location.`
-              },
-              toWalletResource(walletInfo, defaultWalletAddress)
-            ]
+            content: [{
+              type: 'text',
+              text: `Generated new wallet:\n\nName: ${walletInfo.name}\nAddress: ${walletInfo.address}\n\n⚠️ IMPORTANT: Since you chose not to save the wallet to a config file,\nthe mnemonic is displayed below. This is your ONLY chance to save it!\n\nMnemonic: ${mnemonic}\n\nPlease store this mnemonic phrase in a secure location.`
+            }]
           };
         } else {
           // Get the wallet config path for the message
@@ -381,13 +310,10 @@ export function registerWalletManagementTools(registration: Registration) {
 
           // If saving to config, don't display the mnemonic for security
           return {
-            content: [
-              {
-                type: 'text',
-                text: `Generated new wallet:\n\nName: ${walletInfo.name}\nAddress: ${walletInfo.address}\n\n⚠️ IMPORTANT: For security reasons, the mnemonic is not displayed here.\nUse the following command to view your mnemonic when needed:\n\nsui-wallets-export-mnemonic --identifier "${walletInfo.name}"\n\nWallet saved to ${walletConfig}`
-              },
-              toWalletResource(walletInfo, defaultWalletAddress)
-            ]
+            content: [{
+              type: 'text',
+              text: `Generated new wallet:\n\nName: ${walletInfo.name}\nAddress: ${walletInfo.address}\n\n⚠️ IMPORTANT: For security reasons, the mnemonic is not displayed here.\nUse the following command to view your mnemonic when needed:\n\nsui-wallets-export-mnemonic --identifier "${walletInfo.name}"\n\nWallet saved to ${walletConfig}`
+            }]
           };
         }
       } catch (error) {
@@ -528,12 +454,23 @@ export function registerWalletManagementTools(registration: Registration) {
           };
         }
 
-        // Get default wallet info
+        // Format wallet for display
         const defaultWallet = walletManager.getDefaultWallet();
-        const defaultWalletAddress = defaultWallet?.address;
+        const isDefault = defaultWallet ? wallet.address === defaultWallet.address : false;
+
+        const formattedWallet = {
+          name: wallet.name,
+          address: wallet.address,
+          isDefault,
+          hasCredentials: !!wallet.credentials,
+          hasKeypair: !!wallet.keypair
+        };
 
         return {
-          content: [toWalletResource(wallet, defaultWalletAddress)]
+          content: [{
+            type: 'text',
+            text: JSON.stringify(formattedWallet, null, 2)
+          }]
         };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
