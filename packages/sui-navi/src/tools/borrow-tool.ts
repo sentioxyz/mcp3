@@ -2,39 +2,26 @@ import {z} from 'zod';
 import {Registration} from "@mcp3/common";
 import {Transaction} from '@mysten/sui/transactions';
 import {SuiClient} from '@mysten/sui/client';
-import {toBase64} from '@mysten/sui/utils';
 import {getWalletManager} from '@mcp3/sui-base';
-import {depositCoin, pool, Pool, PoolConfig, returnMergedCoins} from 'navi-sdk'
+import {borrowCoin, pool, Pool, PoolConfig, updateOraclePTB} from 'navi-sdk'
 import {getCoinInfo} from "../coin_info.js";
-
-export async function transactionToResource(tx: Transaction, client: SuiClient) {
-    const hash = await tx.getDigest({client});
-    let bytes = await tx.build({client});
-    return {
-        uri: `sui://tx/${hash}`,
-        mimeType: 'application/json',
-        text: JSON.stringify({
-            digest: hash,
-            bytes: toBase64(bytes),
-            data: tx.getData()
-        }, null, 2)
-    };
-}
+import {transactionToResource} from "./deposit-tool.js";
 
 /**
- * Register the Navi deposit tool with the Registration
+ * Register the borrow tool with the Registration
  * @param registration The Registration instance
  */
-export function registerNaviDepositTool(registration: Registration) {
+export function registerBorrowTool(registration: Registration) {
     registration.addTool({
-        name: 'sui-navi-deposit',
-        description: 'Create a Navi deposit transaction, return the transaction bytes',
+        name: 'sui-navi-borrow',
+        description: 'Borrow assets from Navi Protocol',
         args: {
-            coinType: z.string().describe('The coin type to deposit (e.g., "0x2::sui::SUI")'),
-            amount: z.number().describe('The amount to deposit'),
-            walletAddress: z.string().optional().describe('The wallet address to use (optional, uses default if not provided)')
+            coinType: z.string().describe('The coin type to borrow (e.g., "Sui", "USDC", "USDT")'),
+            amount: z.number().describe('The amount to borrow (in human-readable format, e.g., 10 for 10 SUI)'),
+            walletAddress: z.string().optional().describe('The wallet address to use (optional, uses default if not provided)'),
+            updateOracle: z.boolean().optional().default(true).describe('Whether to update the oracle before borrowing (default: true)')
         },
-        callback: async ({coinType, amount, walletAddress}, extra) => {
+        callback: async ({coinType, amount, walletAddress, updateOracle}, extra) => {
             try {
                 // Get a wallet manager
                 const walletManager = await getWalletManager({
@@ -77,22 +64,21 @@ export function registerNaviDepositTool(registration: Registration) {
                 const txb = new Transaction()
                 txb.setSender(sender)
 
+                // Update oracle if requested
+                if (updateOracle) {
+                    // @ts-ignore
+                    await updateOraclePTB(client, txb);
+                }
+
                 const coinSymbol = coinInfo.symbol
                 const poolConfig: PoolConfig = pool[coinSymbol as keyof Pool];
 
-                if (coinSymbol == "Sui") {
-                    const [toDeposit] = txb.splitCoins(txb.gas, [onChainAmount]);
-                    // @ts-ignore
-                    await depositCoin(txb, poolConfig, toDeposit, onChainAmount);
-                } else {
-                    // @ts-ignore
-                    const mergedCoinObject = returnMergedCoins(txb, coinInfo);
-                    const mergedCoinObjectWithAmount = txb.splitCoins(mergedCoinObject, [
-                        onChainAmount,
-                    ]);
-                    // @ts-ignore
-                    await depositCoin(txb, poolConfig, mergedCoinObjectWithAmount, onChainAmount);
-                }
+                // Call the borrowCoin function from the SDK
+                // @ts-ignore
+                const [borrowedCoin] = await borrowCoin(txb, poolConfig, onChainAmount);
+                
+                // Transfer the borrowed coin to the sender
+                txb.transferObjects([borrowedCoin], txb.pure.address(sender));
 
                 return {
                     content: [{
@@ -106,7 +92,7 @@ export function registerNaviDepositTool(registration: Registration) {
                 return {
                     content: [{
                         type: 'text',
-                        text: `Failed to create Navi deposit transaction: ${errorMessage}`
+                        text: `Failed to create Navi borrow transaction: ${errorMessage}`
                     }],
                     isError: true
                 };

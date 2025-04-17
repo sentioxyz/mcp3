@@ -191,7 +191,31 @@ export class Registration {
                         signal: controller.signal
                     });
                     if (result && result.content) {
-                        console.log(result.content);
+                        // Check if the content is an array with a single item
+                        if (Array.isArray(result.content)) {
+                            for (const item of result.content) {
+                                // Handle resource type with JSON content specially
+                                if (item.type === 'resource' &&
+                                    item.resource &&
+                                    item.resource.mimeType?.includes("json")) {
+                                    // Parse and format the JSON
+                                    const jsonData = JSON.parse(item.resource.text as string);
+                                    const output = {
+                                        ...item,
+                                        resource: {
+                                            ...item.resource,
+                                            text: jsonData
+                                        }
+                                    }
+                                    console.log(JSON.stringify(output, null, 2));
+
+                                } else {
+                                    console.log(item);
+                                }
+                            }
+                        } else {
+                            console.log(result.content);
+                        }
                     }
                     if (result && result.isError) {
                         process.exit(1);

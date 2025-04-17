@@ -15,7 +15,7 @@ export async function registerSubProjects(registration: Registration) {
             console.error(`Loaded subproject ${subProject}`);
         } catch (e) {
             // Ignore errors
-            console.error(`Subproject ${subProject} not found, skipped`);
+            console.error(`Subproject ${subProject} not found, skipped`, e);
         }
     }
 }

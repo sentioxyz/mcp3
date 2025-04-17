@@ -74,8 +74,12 @@ export function registerTransactionTools(registration: Registration) {
 
         return {
           content: [{
-            type: 'text',
-            text: JSON.stringify(result, null, 2)
+            type: 'resource',
+            resource: {
+              uri: `sui://tx/${result.digest}`,
+              mimeType: 'application/json',
+              text: JSON.stringify(result, null, 2)
+            },
           }]
         };
       } catch (error) {

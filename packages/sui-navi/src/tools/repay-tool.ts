@@ -2,36 +2,22 @@ import {z} from 'zod';
 import {Registration} from "@mcp3/common";
 import {Transaction} from '@mysten/sui/transactions';
 import {SuiClient} from '@mysten/sui/client';
-import {toBase64} from '@mysten/sui/utils';
 import {getWalletManager} from '@mcp3/sui-base';
-import {depositCoin, pool, Pool, PoolConfig, returnMergedCoins} from 'navi-sdk'
+import {repayDebt, pool, Pool, PoolConfig, returnMergedCoins} from 'navi-sdk'
 import {getCoinInfo} from "../coin_info.js";
-
-export async function transactionToResource(tx: Transaction, client: SuiClient) {
-    const hash = await tx.getDigest({client});
-    let bytes = await tx.build({client});
-    return {
-        uri: `sui://tx/${hash}`,
-        mimeType: 'application/json',
-        text: JSON.stringify({
-            digest: hash,
-            bytes: toBase64(bytes),
-            data: tx.getData()
-        }, null, 2)
-    };
-}
+import {transactionToResource} from "./deposit-tool.js";
 
 /**
- * Register the Navi deposit tool with the Registration
+ * Register the repay tool with the Registration
  * @param registration The Registration instance
  */
-export function registerNaviDepositTool(registration: Registration) {
+export function registerRepayTool(registration: Registration) {
     registration.addTool({
-        name: 'sui-navi-deposit',
-        description: 'Create a Navi deposit transaction, return the transaction bytes',
+        name: 'sui-navi-repay',
+        description: 'Repay debt to Navi Protocol',
         args: {
-            coinType: z.string().describe('The coin type to deposit (e.g., "0x2::sui::SUI")'),
-            amount: z.number().describe('The amount to deposit'),
+            coinType: z.string().describe('The coin type to repay (e.g., "Sui", "USDC", "USDT")'),
+            amount: z.number().describe('The amount to repay (in human-readable format, e.g., 10 for 10 SUI)'),
             walletAddress: z.string().optional().describe('The wallet address to use (optional, uses default if not provided)')
         },
         callback: async ({coinType, amount, walletAddress}, extra) => {
@@ -80,18 +66,30 @@ export function registerNaviDepositTool(registration: Registration) {
                 const coinSymbol = coinInfo.symbol
                 const poolConfig: PoolConfig = pool[coinSymbol as keyof Pool];
 
+                // Get the coins owned by the sender
+                const coins = await client.getCoins({
+                    owner: sender,
+                    coinType: coinInfo.address
+                });
+
+                if (!coins.data.length) {
+                    throw new Error("Insufficient balance for this Coin");
+                }
+
                 if (coinSymbol == "Sui") {
-                    const [toDeposit] = txb.splitCoins(txb.gas, [onChainAmount]);
+                    const [toRepay] = txb.splitCoins(txb.gas, [onChainAmount]);
                     // @ts-ignore
-                    await depositCoin(txb, poolConfig, toDeposit, onChainAmount);
+                    await repayDebt(txb, poolConfig, toRepay, onChainAmount);
                 } else {
                     // @ts-ignore
-                    const mergedCoinObject = returnMergedCoins(txb, coinInfo);
+                    const mergedCoinObject = returnMergedCoins(txb, {
+                        data: coins.data
+                    });
                     const mergedCoinObjectWithAmount = txb.splitCoins(mergedCoinObject, [
                         onChainAmount,
                     ]);
                     // @ts-ignore
-                    await depositCoin(txb, poolConfig, mergedCoinObjectWithAmount, onChainAmount);
+                    await repayDebt(txb, poolConfig, mergedCoinObjectWithAmount, onChainAmount);
                 }
 
                 return {
@@ -106,7 +104,7 @@ export function registerNaviDepositTool(registration: Registration) {
                 return {
                     content: [{
                         type: 'text',
-                        text: `Failed to create Navi deposit transaction: ${errorMessage}`
+                        text: `Failed to create Navi repay transaction: ${errorMessage}`
                     }],
                     isError: true
                 };
