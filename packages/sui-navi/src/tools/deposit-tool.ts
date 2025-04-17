@@ -3,9 +3,23 @@ import {Registration} from "@mcp3/common";
 import {Transaction} from '@mysten/sui/transactions';
 import {SuiClient} from '@mysten/sui/client';
 import {toBase64} from '@mysten/sui/utils';
-import {fetchCoins, getWalletManager} from '@mcp3/sui-base';
+import {getWalletManager} from '@mcp3/sui-base';
 import {depositCoin, pool, Pool, PoolConfig, returnMergedCoins} from 'navi-sdk'
 import {getCoinInfo} from "../coin_info.js";
+
+export async function transactionToResource(tx: Transaction, client: SuiClient) {
+    const hash = await tx.getDigest({client});
+    let bytes = await tx.build({client});
+    return {
+        uri: `sui://tx/${hash}`,
+        mimeType: 'application/json',
+        text: JSON.stringify({
+            digest: hash,
+            bytes: toBase64(bytes),
+            data: tx.getData()
+        }, null, 2)
+    };
+}
 
 /**
  * Register the Navi deposit tool with the Registration
@@ -14,7 +28,7 @@ import {getCoinInfo} from "../coin_info.js";
 export function registerNaviDepositTool(registration: Registration) {
     registration.addTool({
         name: 'sui-navi-deposit',
-        description: 'Create and submit a Navi deposit transaction',
+        description: 'Create a Navi deposit transaction, return the transaction bytes',
         args: {
             coinType: z.string().describe('The coin type to deposit (e.g., "0x2::sui::SUI")'),
             amount: z.number().describe('The amount to deposit'),
@@ -45,11 +59,11 @@ export function registerNaviDepositTool(registration: Registration) {
 
                 const coinInfo = getCoinInfo(coinType);
                 if (!coinInfo) {
-                    throw new Error("Not supported coin "+ coinType);
+                    throw new Error("Not supported coin " + coinType);
                 }
 
                 // Get coin metadata to determine decimals
-                const client = new SuiClient({ url: registration.globalOptions.nodeUrl });
+                const client = new SuiClient({url: registration.globalOptions.nodeUrl});
                 const metadata = await client.getCoinMetadata({
                     coinType: coinInfo.address
                 });
@@ -83,10 +97,7 @@ export function registerNaviDepositTool(registration: Registration) {
                 return {
                     content: [{
                         type: 'resource',
-                        resource: {
-                            uri: `sui://tx/${await txb.getDigest({client})}`,
-                            blob: toBase64(await txb.build({client}))
-                        },
+                        resource: await transactionToResource(txb, client),
                     }],
                 }
 

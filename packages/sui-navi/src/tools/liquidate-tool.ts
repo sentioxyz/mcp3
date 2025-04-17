@@ -2,9 +2,10 @@ import {z} from 'zod';
 import {Registration} from "@mcp3/common";
 import {Transaction} from '@mysten/sui/transactions';
 import {SuiClient} from '@mysten/sui/client';
-import {resolveWalletAddressOrThrow, transactionToResource} from '@mcp3/sui-base';
-import {liquidateFunction, updateOraclePTB} from 'navi-sdk'
+import {getWalletManager} from '@mcp3/sui-base';
+import {liquidateFunction, pool, Pool, PoolConfig, returnMergedCoins, updateOraclePTB} from 'navi-sdk'
 import {getCoinInfo} from "../coin_info.js";
+import {transactionToResource} from "./deposit-tool.js";
 
 /**
  * Register the liquidate tool with the Registration
@@ -24,7 +25,26 @@ export function registerLiquidateTool(registration: Registration) {
         },
         callback: async ({payCoinType, liquidationAddress, collateralCoinType, liquidationAmount, walletAddress, updateOracle}, extra) => {
             try {
-                const sender = await resolveWalletAddressOrThrow(walletAddress);
+                // Get a wallet manager
+                const walletManager = await getWalletManager({
+                    nodeUrl: registration.globalOptions.nodeUrl,
+                    walletConfig: registration.globalOptions.walletConfig
+                });
+                let sender: string
+                if (walletAddress) {
+                    sender = walletManager?.getWallet(walletAddress)?.address ?? walletAddress
+                } else {
+                    sender = walletManager?.getDefaultWallet()?.address ?? ''
+                }
+                if (!sender) {
+                    return {
+                        content: [{
+                            type: 'text',
+                            text: 'No wallet address provided and no default wallet address configured.'
+                        }],
+                        isError: true
+                    };
+                }
 
                 const payCoinInfo = getCoinInfo(payCoinType);
                 if (!payCoinInfo) {
@@ -89,7 +109,7 @@ export function registerLiquidateTool(registration: Registration) {
                 if (payCoinInfo.symbol === "Sui") {
                     // Keep some SUI for gas
                     totalBalance = (Number(totalBalance) - 1 * 1e9).toString();
-
+                    
                     let [mergedCoin] = txb.splitCoins(txb.gas, [txb.pure.u64(Number(totalBalance))]);
 
                     const [mergedCoinBalance] = txb.moveCall({
