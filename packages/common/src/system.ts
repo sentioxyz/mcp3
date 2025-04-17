@@ -198,8 +198,14 @@ export class Registration {
                                 if (item.type === 'resource' &&
                                     item.resource &&
                                     item.resource.mimeType?.includes("json")) {
-                                    // Parse and format the JSON
-                                    const jsonData = JSON.parse(item.resource.text as string);
+                                    // Parse and format the JSON with error handling
+                                    let jsonData;
+                                    try {
+                                        jsonData = JSON.parse(item.resource.text as string);
+                                    } catch (parseError) {
+                                        console.error(`Failed to parse JSON for item: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
+                                        jsonData = null; // Fallback to null or handle as needed
+                                    }
                                     const output = {
                                         ...item,
                                         resource: {
