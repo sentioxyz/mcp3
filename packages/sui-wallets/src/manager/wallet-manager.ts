@@ -1,30 +1,93 @@
-import { SuiClient } from '@mysten/sui/client';
-import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
-import { Secp256k1Keypair } from '@mysten/sui/keypairs/secp256k1';
-import { Secp256r1Keypair } from '@mysten/sui/keypairs/secp256r1';
-import { Keypair } from '@mysten/sui/cryptography';
-import { Transaction } from '@mysten/sui/transactions';
-import { fromB64, toB64 } from '@mysten/sui/utils';
+import {SuiClient} from '@mysten/sui/client';
+import {Ed25519Keypair} from '@mysten/sui/keypairs/ed25519';
+import {Secp256k1Keypair} from '@mysten/sui/keypairs/secp256k1';
+import {Secp256r1Keypair} from '@mysten/sui/keypairs/secp256r1';
+import {decodeSuiPrivateKey, Keypair, SignatureWithBytes} from '@mysten/sui/cryptography';
+import {Transaction} from '@mysten/sui/transactions';
+import {fromBase64} from '@mysten/sui/utils';
 import * as bip39 from '@scure/bip39';
-import { wordlist } from '@scure/bip39/wordlists/english';
-import { WalletPersistence, ConfigFileWalletPersistence, EnvVarWalletPersistence } from './persistence/index.js';
-import { decodeSuiPrivateKey } from '@mysten/sui/cryptography';
-import dotenv from 'dotenv';
+import {wordlist} from '@scure/bip39/wordlists/english';
+import {ConfigFileWalletPersistence, EnvVarWalletPersistence, WalletPersistence} from './persistence/index.js';
 
-// Load environment variables
-dotenv.config();
+import {SuiTransactionBlockResponse} from "@mysten/sui/client";
 
+ /**
+ * Interface for wallet credentials
+ */
 export interface WalletCredentials {
   privateKey?: string;
   mnemonic?: string;
 }
 
+/**
+ * Interface for wallet information
+ */
 export interface WalletInfo {
   address: string;
   name: string;
   credentials?: WalletCredentials;
   keypair?: Keypair;
 }
+
+/**
+ * Interface for wallet manager
+ */
+export interface IWalletManager {
+  /**
+   * List all wallets
+   * @returns Array of wallet info objects
+   */
+  getAllWallets(): WalletInfo[];
+
+  /**
+   * Get the default wallet
+   * @returns The default wallet info or null if not set
+   */
+  getDefaultWallet(): WalletInfo | null;
+
+  /**
+   * Get a wallet by address or name
+   * @param addressOrName Wallet address or name (optional, uses default if not provided)
+   * @param options Options for wallet lookup
+   * @returns The wallet info or null if not found
+   */
+  getWallet(
+      addressOrName?: string,
+      options?: {
+        allowPartialMatch?: boolean,
+        caseSensitive?: boolean
+      }
+  ): WalletInfo | null;
+
+  /**
+   * Sign a transaction
+   * @param addressOrName Wallet address or name (optional, uses default if not provided)
+   * @param transaction The transaction to sign
+   * @returns The signed transaction
+   */
+  signTransaction(
+      addressOrName: string | undefined,
+      transaction: Transaction
+  ): Promise<SignatureWithBytes>;
+
+  /**
+   * Sign and submit a transaction
+   * @param addressOrName Wallet address or name (optional, uses default if not provided)
+   * @param transaction The transaction to sign and submit
+   * @returns The transaction response
+   */
+  signAndSubmitTransaction(
+      addressOrName: string | undefined,
+      transaction: Transaction
+  ): Promise<SuiTransactionBlockResponse>;
+
+  /**
+   * Get the SUI client
+   * @returns The SUI client
+   */
+  getClient(): SuiClient;
+}
+
 
 export interface WalletConfig {
   wallets: {
@@ -42,7 +105,7 @@ export interface WalletManagerOptions {
   persistence?: WalletPersistence | WalletPersistence[];
 }
 
-export class WalletManager {
+export class WalletManager implements IWalletManager {
   private wallets: Map<string, WalletInfo> = new Map();
   private nameToAddress: Map<string, string> = new Map();
   private defaultWallet: string | null = null;
@@ -93,7 +156,7 @@ export class WalletManager {
           const credentials: WalletCredentials = {};
           const name = wallet.name || this.generateShortAddress(wallet.address);
 
-          // Prioritize mnemonic over private key if both are present
+          // Prioritize mnemonic over a private key if both are present
           if (wallet.mnemonic) {
             credentials.mnemonic = wallet.mnemonic;
           } else if (wallet.privateKey) {
@@ -186,7 +249,7 @@ export class WalletManager {
           } else {
             // Try to parse as base64 string (legacy format)
             try {
-              const privateKeyBytes = fromB64(credentials.privateKey);
+              const privateKeyBytes = fromBase64(credentials.privateKey);
               walletInfo.keypair = Ed25519Keypair.fromSecretKey(privateKeyBytes);
             } catch (e) {
               // If it's not a valid base64 string, it might be a serialized keypair
@@ -496,12 +559,12 @@ export class WalletManager {
   }
 
   /**
-   * Sign and execute a transaction
+   * Sign and submit a transaction
    * @param addressOrName Wallet address or name (optional, uses default if not provided)
-   * @param transaction The transaction to sign and execute
+   * @param transaction The transaction to sign and submit
    * @returns The transaction response
    */
-  public async signAndExecuteTransaction(addressOrName: string | undefined, transaction: Transaction) {
+  public async signAndSubmitTransaction(addressOrName: string | undefined, transaction: Transaction) {
     // Sign the transaction
     const signedTx = await this.signTransaction(addressOrName, transaction);
 
@@ -522,6 +585,16 @@ export class WalletManager {
    */
   public getClient(): SuiClient {
     return this.client;
+  }
+
+  /**
+   * Sign and execute a transaction (alias for signAndSubmitTransaction for backward compatibility)
+   * @param addressOrName Wallet address or name (optional, uses default if not provided)
+   * @param transaction The transaction to sign and execute
+   * @returns The transaction response
+   */
+  public async signAndExecuteTransaction(addressOrName: string | undefined, transaction: Transaction) {
+    return this.signAndSubmitTransaction(addressOrName, transaction);
   }
 
   /**

@@ -191,13 +191,7 @@ export class Registration {
                         signal: controller.signal
                     });
                     if (result && result.content) {
-                        for (const item of result.content) {
-                            if (item.type === 'text') {
-                                console.log(item.text);
-                            } else if (item.type === 'resource' && item.resource) {
-                                console.log(`Resource: ${item.resource.uri} (${item.resource.mimeType})`);
-                            }
-                        }
+                        console.log(result.content);
                     }
                     if (result && result.isError) {
                         process.exit(1);
