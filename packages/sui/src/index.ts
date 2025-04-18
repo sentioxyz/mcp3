@@ -4,7 +4,8 @@ import {Registration} from "@mcp3/common";
 const availableSubProjects = [
     '@mcp3/sui-wallets',
     '@mcp3/sui-navi',
-    '@mcp3/sui-cetus'
+    '@mcp3/sui-cetus',
+    '@mcp3/defilama'
 ]
 
 export async function registerSubProjects(registration: Registration) {
