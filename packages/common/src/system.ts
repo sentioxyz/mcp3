@@ -231,24 +231,30 @@ export class Registration {
                             for (const item of result.content) {
                                 // Handle resource type with JSON content specially
                                 if (item.type === 'resource' &&
-                                    item.resource &&
-                                    item.resource.mimeType?.includes("json")) {
+                                    item.resource
+                                    ) {
                                     // Parse and format the JSON with error handling
-                                    let jsonData;
-                                    try {
-                                        jsonData = JSON.parse(item.resource.text as string);
-                                    } catch (parseError) {
-                                        console.error(`Failed to parse JSON for item: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
-                                        jsonData = null; // Fallback to null or handle as needed
-                                    }
-                                    const output = {
-                                        ...item,
-                                        resource: {
-                                            ...item.resource,
-                                            text: jsonData
+                                    if (item.resource.mimeType?.includes("json")) {
+                                        let jsonData;
+                                        try {
+                                            jsonData = JSON.parse(item.resource.text as string);
+                                        } catch (parseError) {
+                                            console.error(`Failed to parse JSON for item: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
+                                            jsonData = null; // Fallback to null or handle as needed
                                         }
+                                        const output = {
+                                            ...item,
+                                            resource: {
+                                                ...item.resource,
+                                                text: jsonData
+                                            }
+                                        }
+                                        console.log(JSON.stringify(output, null, 2));
+                                    } else if (item.resource.mimeType?.includes("text")) {
+                                        console.log(item.resource.text);
+                                    } else {
+                                        console.log(item);
                                     }
-                                    console.log(JSON.stringify(output, null, 2));
 
                                 } else {
                                     console.log(item);
