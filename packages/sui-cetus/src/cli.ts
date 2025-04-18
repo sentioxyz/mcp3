@@ -6,7 +6,7 @@ import {registerCetusTools} from "./tools/index.js";
 import {registerCetusResource} from "./resources/cetus-resource.js";
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const registration = new Registration("mcp3-sui-cetus", "Sui Cetus Protocol", "1.0.0");
+  const registration = Registration.create("mcp3-sui-cetus", "Sui Cetus Protocol", "1.0.0");
 
   // Add global options from sui-base
   addSuiGlobalOptions(registration);

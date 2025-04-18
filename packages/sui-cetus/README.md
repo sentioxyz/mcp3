@@ -63,9 +63,12 @@ The package provides the following CLI commands:
 - `sui-cetus-positions`: Get positions for a specific address
 - `sui-cetus-swap-quote`: Get a quote for swapping tokens
 - `sui-cetus-liquidity-calc`: Calculate liquidity and coin amounts
+- `sui-cetus-add-liquidity`: Add liquidity to a Cetus Protocol pool
 - `sui-cetus-fees`: Calculate fees for a position
 - `sui-cetus-rewards`: Calculate rewards for a position
 - `sui-cetus-apr`: Calculate APR for a pool or position
+- `sui-cetus-deposit`: Deposit tokens into a Cetus Protocol liquidity pool
+- `sui-cetus-withdraw`: Withdraw tokens from a Cetus Protocol liquidity position
 
 ## License
 

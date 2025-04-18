@@ -3,12 +3,9 @@
 import {Registration, startCli} from "@mcp3/common";
 import {registerWalletsTools} from "./tools/index.js";
 import {registerWalletsResource} from "./resources/wallets-resource.js";
-import os from 'os';
-import path from 'path';
-import fs from 'fs';
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-    const registration = new Registration("mcp3-sui-wallets", "Sui Wallet Management", "1.0.0");
+    const registration = Registration.create("mcp3-sui-wallets", "Sui Wallet Management", "1.0.0");
 
     registration.addGlobalOption((command) => {
         command.option('-e, --node-url <nodeUrl>', 'Sui RPC Endpoint URL', process.env.SUI_RPC_URL || 'https://fullnode.mainnet.sui.io:443');

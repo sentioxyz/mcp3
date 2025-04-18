@@ -5,7 +5,10 @@ import { registerSUIBaseTools } from './tools/index.js';
 
 export * from './utils/index.js';
 export * from './cli/index.js';
-export * from './address.js'
+export * from './address.js';
+export * from './wallet-manager.js';
+export * from './coins.js';
+export * from './transaction.js';
 
 export function register(registration: Registration) {
     registerSUIBaseTools(registration);
