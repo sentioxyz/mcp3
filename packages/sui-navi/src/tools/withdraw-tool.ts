@@ -2,10 +2,12 @@ import {z} from 'zod';
 import {Registration} from "@mcp3/common";
 import {Transaction} from '@mysten/sui/transactions';
 import {SuiClient} from '@mysten/sui/client';
-import {getWalletManager} from '@mcp3/sui-base';
+import {
+    transactionToResource,
+    resolveWalletAddressOrThrow
+} from '@mcp3/sui-base';
 import {pool, Pool, PoolConfig, withdrawCoin} from 'navi-sdk'
 import {getCoinInfo} from "../coin_info.js";
-import {transactionToResource} from "./deposit-tool.js";
 import {updateOraclePTB} from "navi-sdk";
 
 
@@ -24,26 +26,7 @@ export function registerNaviWithdrawTool(registration: Registration) {
         },
         callback: async ({coinType, amount, walletAddress}, extra) => {
             try {
-                // Get a wallet manager
-                const walletManager = await getWalletManager({
-                    nodeUrl: registration.globalOptions.nodeUrl,
-                    walletConfig: registration.globalOptions.walletConfig
-                });
-                let sender: string
-                if (walletAddress) {
-                    sender = walletManager?.getWallet(walletAddress)?.address ?? walletAddress
-                } else {
-                    sender = walletManager?.getDefaultWallet()?.address ?? ''
-                }
-                if (!sender) {
-                    return {
-                        content: [{
-                            type: 'text',
-                            text: 'No wallet address provided and no default wallet address configured.'
-                        }],
-                        isError: true
-                    };
-                }
+                const sender = await resolveWalletAddressOrThrow(walletAddress);
 
                 const coinInfo = getCoinInfo(coinType);
                 if (!coinInfo) {
@@ -74,7 +57,7 @@ export function registerNaviWithdrawTool(registration: Registration) {
                 // Call the withdrawCoin function from the SDK
                 // @ts-ignore
                 const [withdrawnCoin] = await withdrawCoin(txb, poolConfig, onChainAmount);
-                
+
                 // Transfer the withdrawn coin to the sender
                 txb.transferObjects([withdrawnCoin], txb.pure.address(sender));
 

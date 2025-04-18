@@ -2,24 +2,12 @@ import {z} from 'zod';
 import {Registration} from "@mcp3/common";
 import {Transaction} from '@mysten/sui/transactions';
 import {SuiClient} from '@mysten/sui/client';
-import {toBase64} from '@mysten/sui/utils';
-import {getWalletManager} from '@mcp3/sui-base';
+import {resolveWalletAddressOrThrow, transactionToResource} from '@mcp3/sui-base';
 import {depositCoin, pool, Pool, PoolConfig, returnMergedCoins} from 'navi-sdk'
 import {getCoinInfo} from "../coin_info.js";
 
-export async function transactionToResource(tx: Transaction, client: SuiClient) {
-    const hash = await tx.getDigest({client});
-    let bytes = await tx.build({client});
-    return {
-        uri: `sui://tx/${hash}`,
-        mimeType: 'application/json',
-        text: JSON.stringify({
-            digest: hash,
-            bytes: toBase64(bytes),
-            data: tx.getData()
-        }, null, 2)
-    };
-}
+// Re-export transactionToResource from sui-base for backward compatibility
+export {transactionToResource};
 
 /**
  * Register the Navi deposit tool with the Registration
@@ -37,25 +25,7 @@ export function registerNaviDepositTool(registration: Registration) {
         callback: async ({coinType, amount, walletAddress}, extra) => {
             try {
                 // Get a wallet manager
-                const walletManager = await getWalletManager({
-                    nodeUrl: registration.globalOptions.nodeUrl,
-                    walletConfig: registration.globalOptions.walletConfig
-                });
-                let sender: string
-                if (walletAddress) {
-                    sender = walletManager?.getWallet(walletAddress)?.address ?? walletAddress
-                } else {
-                    sender = walletManager?.getDefaultWallet()?.address ?? ''
-                }
-                if (!sender) {
-                    return {
-                        content: [{
-                            type: 'text',
-                            text: 'No wallet address provided and no default wallet address configured.'
-                        }],
-                        isError: true
-                    };
-                }
+                const sender = await resolveWalletAddressOrThrow(walletAddress);
 
                 const coinInfo = getCoinInfo(coinType);
                 if (!coinInfo) {
