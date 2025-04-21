@@ -1,6 +1,6 @@
 {
   "name": "@mcp3/sui-wallets",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Wallet management tools for Sui Network in MCP3",
   "main": "build/index.js",
   "type": "module",

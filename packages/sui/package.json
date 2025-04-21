@@ -1,14 +1,16 @@
 {
   "name": "@mcp3/sui",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Model Context Protocol implementation for Sui Network",
   "main": "build/index.js",
   "type": "module",
   "bin": {
-    "sui-mcp": "build/cli/index.js"
+    "sui-mcp": "build/cli/index.js",
+    "mcp3-sui": "build/cli/index.js"
   },
   "scripts": {
     "build": "tsc",
+    "postbuild": "chmod +x build/cli/index.js",
     "start": "node build/cli/index.js start",
     "dev": "ts-node src/cli.ts",
     "clean": "rm -rf build"

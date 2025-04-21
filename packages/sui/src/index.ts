@@ -5,7 +5,8 @@ const availableSubProjects = [
     '@mcp3/sui-wallets',
     '@mcp3/sui-navi',
     '@mcp3/sui-cetus',
-    '@mcp3/defilama'
+    '@mcp3/defilama',
+    '@mcp3/dex-screener'
 ]
 
 export async function registerSubProjects(registration: Registration) {

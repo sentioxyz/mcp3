@@ -80,6 +80,25 @@ importers:
         specifier: ^5.8.3
         version: 5.8.3
 
+  packages/dex-screener:
+    dependencies:
+      '@mcp3/common':
+        specifier: workspace:*
+        version: link:../common
+      node-fetch:
+        specifier: '3'
+        version: 3.3.2
+      zod:
+        specifier: ^3.24.2
+        version: 3.24.2
+    devDependencies:
+      '@types/node':
+        specifier: ^20.8.9
+        version: 20.17.30
+      typescript:
+        specifier: ^5.2.2
+        version: 5.8.3
+
   packages/eth:
     dependencies:
       '@aptos-labs/ts-sdk':
