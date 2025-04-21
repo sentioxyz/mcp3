@@ -1,0 +1,35 @@
+{
+  "name": "@mcp3/dex-screener",
+  "version": "1.0.0",
+  "description": "DexScreener API integration for MCP3",
+  "main": "build/index.js",
+  "type": "module",
+  "bin": {
+    "dex-screener": "build/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node build/cli.js",
+    "dev": "ts-node src/cli.ts",
+    "clean": "rm -rf build",
+    "test": "tsx --test src/**/*.test.ts"
+  },
+  "keywords": [
+    "dexscreener",
+    "mcp",
+    "blockchain",
+    "defi",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@mcp3/common": "workspace:*",
+    "node-fetch": "3",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.9",
+    "typescript": "^5.2.2"
+  }
+}

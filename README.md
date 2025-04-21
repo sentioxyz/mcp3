@@ -7,6 +7,7 @@ This monorepo contains implementations of the Model Context Protocol for differe
 - `@mcp3/common`: Shared utilities and types used across implementations
 - `@mcp3/eth-mcp`: Ethereum implementation of the Model Context Protocol
 - `@mcp3/sui-mcp`: Sui Network implementation of the Model Context Protocol
+- `@mcp3/dex-screener`: DexScreener API integration for MCP3
 
 ## Development
 
