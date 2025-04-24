@@ -47,6 +47,7 @@
   "peerDependencies": {
     "@mcp3/sui-navi": "workspace:*",
     "@mcp3/sui-cetus": "workspace:*",
-    "@mcp3/defilama": "workspace:*"
+    "@mcp3/defilama": "workspace:*",
+    "@mcp3/dex-screener": "workspace:*"
   }
 }

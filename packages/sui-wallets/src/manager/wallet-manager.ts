@@ -541,6 +541,7 @@ export class WalletManager implements IWalletManager {
    * @param addressOrName Wallet address or name (optional, uses default if not provided)
    * @param transaction The transaction to sign
    * @returns The signed transaction bytes
+   * @throws Error if the wallet doesn't have a keypair
    */
   public async signTransaction(addressOrName: string | undefined, transaction: Transaction) {
     // Get the wallet
@@ -550,12 +551,13 @@ export class WalletManager implements IWalletManager {
       throw new Error('Wallet not found');
     }
 
-    if (!wallet.keypair) {
-      throw new Error('Wallet does not have a keypair');
+    // If the wallet has a keypair, sign the transaction directly
+    if (wallet.keypair) {
+      return transaction.sign({ signer: wallet.keypair });
     }
 
-    // Sign the transaction
-    return transaction.sign({ signer: wallet.keypair });
+    // If the wallet doesn't have a keypair, throw an error
+    throw new Error(`Wallet ${wallet.address} does not have a keypair. External signing is required.`);
   }
 
   /**
@@ -781,3 +783,5 @@ export class WalletManager implements IWalletManager {
     return results;
   }
 }
+
+

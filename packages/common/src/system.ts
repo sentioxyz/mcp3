@@ -41,6 +41,7 @@ export class Registration {
     private globalOptionsFn: (CommandFn)[] = [];
     private serveOptionsFn: (CommandFn)[] = [];
     private commandFn: (CommandFn)[] = [];
+    private afterStart: ((options: any) => void)[] = [];
     private tools: Record<string, Tool<any>> = {};
     private resources: Record<string, Resource> = {};
     private resourceTemplates: Record<string, TemplateResource> = {};
@@ -161,6 +162,14 @@ export class Registration {
                 mcpServer.resource(resource.name, resource.template, resource.callback);
         }
         return mcpServer;
+    }
+
+    onServerStart(fn: (options: any) => void)  {
+        this.afterStart.push(fn);
+    }
+
+    afterServerStart(options: any)  {
+        this.afterStart.forEach(fn => fn(options));
     }
 
     registerToolAsCommands(program: Command) {

@@ -1,0 +1,80 @@
+{
+  "name": "@mcp3/transaction-ui",
+  "version": "1.0.0",
+  "description": "A React component library for Sui transaction signing and submission",
+  "type": "module",
+  "main": "dist/transaction-ui.umd.js",
+  "module": "dist/transaction-ui.es.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/transaction-ui.es.js",
+      "require": "./dist/transaction-ui.umd.js"
+    },
+    "./styles.css": "./dist/transaction-ui.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "prepublishOnly": "rm -rf dist && npm run build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "keywords": [
+    "sui",
+    "blockchain",
+    "transaction",
+    "wallet",
+    "react",
+    "ui"
+  ],
+  "author": "MCP3 Team",
+  "license": "MIT",
+  "dependencies": {
+    "@mysten/dapp-kit": "^0.15.7",
+    "@mysten/sui": "^1.28.2",
+    "@radix-ui/react-accordion": "^1.2.8",
+    "@radix-ui/react-select": "^2.2.2",
+    "@radix-ui/react-slot": "^1.2.0",
+    "@tailwindcss/vite": "^4.1.4",
+    "@tanstack/react-query": "^5.28.4",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.503.0",
+    "react-router-dom": "^7.5.1",
+    "tailwind-merge": "^3.2.0",
+    "tailwindcss-animate": "^1.0.7"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.22.0",
+    "@types/node": "^22.14.1",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^9.22.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.19",
+    "globals": "^16.0.0",
+    "postcss": "^8.5.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwindcss": "^4.1.4",
+    "tw-animate-css": "^1.2.8",
+    "typescript": "~5.7.2",
+    "typescript-eslint": "^8.26.1",
+    "vite": "^6.3.1",
+    "vite-plugin-dts": "^3.9.1"
+  }
+}
