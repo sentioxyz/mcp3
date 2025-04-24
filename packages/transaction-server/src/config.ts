@@ -1,11 +1,13 @@
 // Server configuration
 export interface ServerConfig {
+  enabled: boolean;
   address: string;
   port: number;
 }
 
 // Default server configuration
 export const DEFAULT_CONFIG: ServerConfig = {
+  enabled: true,
   address: 'localhost',
   port: 3000
 };

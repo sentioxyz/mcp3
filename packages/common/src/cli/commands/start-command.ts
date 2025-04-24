@@ -27,10 +27,6 @@ export function registerStartCommand(
       await server.connect(transport);
       console.error('Sui MCP server started on stdio');
       registration.afterServerStart(cmdOptions);
-      transport.onclose = () => {
-        console.error('Sui MCP server stopped');
-        registration.closeServer();
-      }
     } catch (error) {
       console.error(chalk.red(`Failed to start MCP server: ${error instanceof Error ? error.message : String(error)}`));
       process.exit(1);

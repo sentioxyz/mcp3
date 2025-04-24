@@ -6,7 +6,7 @@ import fs from 'fs';
 import {fileURLToPath} from 'url';
 import {ServerConfig, DEFAULT_CONFIG, getServerUrl} from './config.js';
 import {setServerUrl} from './utils.js';
-import {transactionStore} from '@mcp3/common';
+import {transactionStore} from './transaction-store.js';
 import {Transaction} from "@mysten/sui/transactions";
 import {Server} from "node:http";
 
@@ -21,6 +21,11 @@ let httpServer: Server | null = null;
  */
 export async function startTransactionServer(config?: Partial<ServerConfig>): Promise<string | null> {
     const serverConfig = {...DEFAULT_CONFIG, ...config};
+
+    // If server is disabled, return null
+    if (!serverConfig.enabled) {
+        return null;
+    }
 
     // If server is already running, return the URL
     if (server) {
