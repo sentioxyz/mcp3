@@ -9,10 +9,6 @@ export { TransactionServerClient } from './client.js';
 export { setServerUrl, getServerUrl } from './utils.js';
 import {Option} from "commander";
 
-// Re-export CLI for programmatic usage
-export { default as cli } from './cli.js';
-
-
 export function register(registration: Registration) {
     registration.addServeOption((command) => {
         command.option('-t, --enable-transaction-server', 'Start the transaction server for signing transactions', true);

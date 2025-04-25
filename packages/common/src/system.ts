@@ -280,6 +280,7 @@ export class Registration {
                     console.error(`Error executing ${toolName}: ${error instanceof Error ? error.message : String(error)}`);
                     process.exit(1);
                 }
+                process.exit(0)
             });
         }
     }

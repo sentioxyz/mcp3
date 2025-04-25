@@ -14,16 +14,56 @@ export function registerTools(registration: Registration) {
     // Protocol endpoints
     registration.addTool({
         name: 'defilama-get-protocols',
-        description: 'List all protocols on DeFiLlama along with their TVL',
-        args: {},
-        callback: async (_) => {
+        description: 'List protocols on DeFiLlama along with their TVL, with pagination support',
+        args: {
+            nameOnly: z.boolean().optional().describe('show name only').default(true),
+            page: z.number().optional().describe('Page number, default is 0').default(0),
+            pageSize: z.number().optional().describe('Page size, default is 500').default(500)
+        },
+        callback: async ({nameOnly, page, pageSize}) => {
             const baseUrl = registration.globalOptions.defilamaEndpoint;
             const client = createClient<paths>({baseUrl});
             const {
                 data,
                 error,
             } = await client.GET("/protocols")
-            return toResult(`${baseUrl}/protocols`, data, error)
+
+            if (error || !data) {
+                return toResult(`${baseUrl}/protocols`, null, error || new Error('No data returned'));
+            }
+
+            // Apply pagination to the results
+            const allProtocols = data as any[];
+            const startIndex = page * pageSize;
+            const endIndex = startIndex + pageSize;
+            const paginatedProtocols = allProtocols.slice(startIndex, endIndex);
+
+            // Calculate total pages
+            const totalProtocols = allProtocols.length;
+            const totalPages = Math.ceil(totalProtocols / pageSize);
+
+            // Create pagination metadata
+            const paginationInfo = {
+                page,
+                pageSize,
+                totalProtocols,
+                totalPages,
+                hasNextPage: page < totalPages - 1,
+                hasPrevPage: page > 0
+            };
+
+            if (nameOnly) {
+                const protocolNames = paginatedProtocols.map((p: any) => p.name);
+                return toResult(`${baseUrl}/protocols?page=${page}&pageSize=${pageSize}`, {
+                    protocols: protocolNames,
+                    pagination: paginationInfo
+                }, null);
+            } else {
+                return toResult(`${baseUrl}/protocols?page=${page}&pageSize=${pageSize}`, {
+                    protocols: paginatedProtocols,
+                    pagination: paginationInfo
+                }, null);
+            }
         }
     });
 
@@ -36,7 +76,7 @@ export function registerTools(registration: Registration) {
         },
         callback: async ({protocol, page}) => {
             const baseUrl = registration.globalOptions.defilamaEndpoint;
-            const uri = `${baseUrl}/protocol/${protocol}`;
+            const uri = `${baseUrl}/protocol/${encodeURIComponent(protocol)}`;
             try {
                 const pagedResult: string = await withCachedResult(uri, page, 1048000, async () => {
                     const client = createClient<paths>({baseUrl});

@@ -4,7 +4,7 @@ import {Registration, startCli} from "@mcp3/common";
 import {registerTools} from "./tools/index.js";
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-    const registration = Registration.create("mcp3-sui-defilama", "DeFiLlama API Integration", "1.0.0");
+    const registration = Registration.create("mcp3-sui-defilama", "DeFiLlama API Integration", "1.0.2");
 
     registration.addGlobalOption((command) => {
         command.option("--defilama-endpoint <endpoint>", "DeFiLlama API endpoint", "https://api.llama.fi");

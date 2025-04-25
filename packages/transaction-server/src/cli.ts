@@ -25,7 +25,6 @@ program
   .option('-p, --port <port>', 'Port to listen on', String(DEFAULT_CONFIG.port))
   .action(async (options) => {
     const config: ServerConfig = {
-      enabled: !options.disable,
       address: options.address,
       port: parseInt(options.port, 10)
     };

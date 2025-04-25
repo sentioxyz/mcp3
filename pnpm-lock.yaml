@@ -207,6 +207,9 @@ importers:
       '@mcp3/sui-wallets':
         specifier: workspace:*
         version: link:../sui-wallets
+      '@mcp3/transaction-server':
+        specifier: workspace:*
+        version: link:../transaction-server
       '@modelcontextprotocol/sdk':
         specifier: ^1.9.0
         version: 1.9.0

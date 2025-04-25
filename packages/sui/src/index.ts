@@ -6,7 +6,8 @@ const availableSubProjects = [
     '@mcp3/sui-navi',
     '@mcp3/sui-cetus',
     '@mcp3/defilama',
-    '@mcp3/dex-screener'
+    '@mcp3/dex-screener',
+    '@mcp3/transaction-server'
 ]
 
 export async function registerSubProjects(registration: Registration) {
@@ -14,10 +15,10 @@ export async function registerSubProjects(registration: Registration) {
         try {
             const subProjectModule = await import(subProject);
             subProjectModule.register(registration);
-            console.error(`Loaded subproject ${subProject}`);
+            console.error(`Loaded ${subProject}`);
         } catch (e) {
             // Ignore errors
-            console.error(`Subproject ${subProject} not found, skipped`, e);
+            console.error(`${subProject} not found, skipped`, e);
         }
     }
 }

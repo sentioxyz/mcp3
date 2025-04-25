@@ -9,7 +9,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
   // Add global options from sui-base
   addSuiGlobalOptions(registration);
-
   register(registration);
 
   // Register sub-projects
