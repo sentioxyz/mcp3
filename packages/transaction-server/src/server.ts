@@ -22,11 +22,6 @@ let httpServer: Server | null = null;
 export async function startTransactionServer(config?: Partial<ServerConfig>): Promise<string | null> {
     const serverConfig = {...DEFAULT_CONFIG, ...config};
 
-    // If server is disabled, return null
-    if (!serverConfig.enabled) {
-        return null;
-    }
-
     // If server is already running, return the URL
     if (server) {
         return getServerUrl(serverConfig);
