@@ -1,6 +1,6 @@
 {
   "name": "@mcp3/sui-base",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Base utilities and tools for Sui Network in MCP3",
   "main": "build/index.js",
   "type": "module",

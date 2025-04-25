@@ -20,6 +20,7 @@
     "pnpm": ">=8"
   },
   "devDependencies": {
+    "glob": "^11.0.1",
     "typescript": "^5.2.2"
   }
 }

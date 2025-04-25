@@ -1,6 +1,6 @@
 {
   "name": "@mcp3/transaction-ui",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A React component library for Sui transaction signing and submission",
   "type": "module",
   "main": "dist/transaction-ui.umd.js",

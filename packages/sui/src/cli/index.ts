@@ -5,7 +5,7 @@ import {addSuiGlobalOptions, register} from "@mcp3/sui-base";
 import {registerSubProjects} from "../index.js";
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const registration = Registration.create("mcp3-sui", "Sui Model Context Protocol", "1.0.0" );
+  const registration = Registration.create("mcp3-sui", "Sui Model Context Protocol", "1.0.7" );
 
   // Add global options from sui-base
   addSuiGlobalOptions(registration);
