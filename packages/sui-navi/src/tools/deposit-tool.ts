@@ -2,7 +2,7 @@ import {z} from 'zod';
 import {Registration} from "@mcp3/common";
 import {Transaction} from '@mysten/sui/transactions';
 import {SuiClient} from '@mysten/sui/client';
-import {resolveWalletAddressOrThrow, transactionToResource} from '@mcp3/sui-base';
+import {transactionToResource} from '@mcp3/sui-base';
 import {depositCoin, pool, Pool, PoolConfig, returnMergedCoins} from 'navi-sdk'
 import {getCoinInfo} from "../coin_info.js";
 
@@ -20,12 +20,11 @@ export function registerNaviDepositTool(registration: Registration) {
         args: {
             coinType: z.string().describe('The coin type to deposit (e.g., "0x2::sui::SUI")'),
             amount: z.number().describe('The amount to deposit'),
-            walletAddress: z.string().optional().describe('The wallet address to use (optional, uses default if not provided)')
+            walletAddress: z.string().describe('The wallet address to use')
         },
         callback: async ({coinType, amount, walletAddress}, extra) => {
             try {
-                // Get a wallet manager
-                const sender = await resolveWalletAddressOrThrow(walletAddress);
+                const sender = walletAddress;
 
                 const coinInfo = getCoinInfo(coinType);
                 if (!coinInfo) {

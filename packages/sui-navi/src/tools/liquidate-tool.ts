@@ -2,7 +2,7 @@ import {z} from 'zod';
 import {Registration} from "@mcp3/common";
 import {Transaction} from '@mysten/sui/transactions';
 import {SuiClient} from '@mysten/sui/client';
-import {resolveWalletAddressOrThrow, transactionToResource} from '@mcp3/sui-base';
+import {transactionToResource} from '@mcp3/sui-base';
 import {liquidateFunction, updateOraclePTB} from 'navi-sdk'
 import {getCoinInfo} from "../coin_info.js";
 
@@ -19,12 +19,12 @@ export function registerLiquidateTool(registration: Registration) {
             liquidationAddress: z.string().describe('The address of the position to liquidate'),
             collateralCoinType: z.string().describe('The coin type to receive as collateral (e.g., "Sui", "USDC", "USDT")'),
             liquidationAmount: z.number().optional().default(0).describe('The amount to liquidate (0 means use all available balance)'),
-            walletAddress: z.string().optional().describe('The wallet address to use (optional, uses default if not provided)'),
+            walletAddress: z.string().describe('The wallet address to use'),
             updateOracle: z.boolean().optional().default(true).describe('Whether to update the oracle before liquidation (default: true)')
         },
         callback: async ({payCoinType, liquidationAddress, collateralCoinType, liquidationAmount, walletAddress, updateOracle}, extra) => {
             try {
-                const sender = await resolveWalletAddressOrThrow(walletAddress);
+                const sender = walletAddress;
 
                 const payCoinInfo = getCoinInfo(payCoinType);
                 if (!payCoinInfo) {

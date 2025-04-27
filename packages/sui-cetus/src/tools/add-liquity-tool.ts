@@ -11,7 +11,7 @@ import {
 // @ts-ignore
 import BN from 'bn.js';
 import {SuiClient} from '@mysten/sui/client';
-import {getWalletManager, resolveWalletAddressOrThrow, transactionToResource} from '@mcp3/sui-base';
+import {transactionToResource} from '@mcp3/sui-base';
 
 /**
  * Register the add liquidity tools with the Registration
@@ -28,7 +28,7 @@ export function registerAddLiquidityTools(registration: Registration) {
             totalAmount: z.string().describe('The total amount to add as liquidity'),
             slippage: z.number().describe('The slippage tolerance percentage (e.g., 0.5 for 0.5%)').default(0.5),
             collectFee: z.boolean().describe('Whether to collect fees while adding liquidity').default(false),
-            walletAddress: z.string().optional().describe('The wallet address to use (optional, uses default if not provided)')
+            walletAddress: z.string().describe('The wallet address to use')
         },
         callback: async ({poolId, tickLower, tickUpper, totalAmount, slippage, collectFee, walletAddress}, extra) => {
             try {
@@ -38,7 +38,7 @@ export function registerAddLiquidityTools(registration: Registration) {
                     fullNodeUrl: registration.globalOptions.nodeUrl
                 });
 
-                const sender: string = await resolveWalletAddressOrThrow(walletAddress);
+                const sender: string = walletAddress;
 
                 // Get pool information
                 const pool = await sdk.Pool.getPool(poolId);
@@ -165,7 +165,7 @@ export function registerAddLiquidityTools(registration: Registration) {
             isOpen: z.boolean().describe('Whether to open a new position (true) or add to existing (false)').default(true),
             positionId: z.string().optional().describe('The position ID to add liquidity to (required if isOpen is false)'),
             collectFee: z.boolean().describe('Whether to collect fees while adding liquidity').default(false),
-            walletAddress: z.string().optional().describe('The wallet address to use (optional, uses default if not provided)')
+            walletAddress: z.string().describe('The wallet address to use')
         },
         callback: async ({poolId, tickLower, tickUpper, fixAmountA, amount, slippage, isOpen, positionId, collectFee, walletAddress}, extra) => {
             try {
@@ -175,13 +175,7 @@ export function registerAddLiquidityTools(registration: Registration) {
                     fullNodeUrl: registration.globalOptions.nodeUrl
                 });
 
-                // Get a wallet manager
-                const walletManager = await getWalletManager({
-                    nodeUrl: registration.globalOptions.nodeUrl,
-                    walletConfig: registration.globalOptions.walletConfig
-                });
-
-                const sender: string = await resolveWalletAddressOrThrow(walletAddress);
+                const sender: string = walletAddress;
 
                 // Get pool information
                 const pool = await sdk.Pool.getPool(poolId);

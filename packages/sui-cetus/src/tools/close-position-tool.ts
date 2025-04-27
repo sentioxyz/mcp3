@@ -11,7 +11,7 @@ import {
 // @ts-ignore
 import BN from 'bn.js';
 import {SuiClient} from '@mysten/sui/client';
-import {getWalletManager, resolveWalletAddressOrThrow, transactionToResource} from '@mcp3/sui-base';
+import {transactionToResource} from '@mcp3/sui-base';
 
 /**
  * Register the close position tool with the Registration
@@ -24,7 +24,7 @@ export function registerClosePositionTool(registration: Registration) {
         args: {
             positionId: z.string().describe('The position ID to close'),
             slippage: z.number().describe('The slippage tolerance percentage (e.g., 0.5 for 0.5%)').default(0.5),
-             walletAddress: z.string().optional().describe('The wallet address to use (optional, uses default if not provided)'),
+             walletAddress: z.string().describe('The wallet address to use'),
             collect_fee: z.boolean().optional().default(false).describe('Collect fee while closing the position'),
             collect_rewards: z.boolean().optional().default(true).describe('Collect rewards while closing the position')
         },
@@ -36,13 +36,7 @@ export function registerClosePositionTool(registration: Registration) {
                     fullNodeUrl: registration.globalOptions.nodeUrl
                 });
 
-                // Get a wallet manager
-                const walletManager = await getWalletManager({
-                    nodeUrl: registration.globalOptions.nodeUrl,
-                    walletConfig: registration.globalOptions.walletConfig
-                });
-
-                const sender: string = await resolveWalletAddressOrThrow(walletAddress);
+                const sender: string = walletAddress;
 
                 // Get position information
                 const position = await sdk.Position.getPositionById(positionId);

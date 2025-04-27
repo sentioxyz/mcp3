@@ -2,10 +2,7 @@ import {z} from 'zod';
 import {Registration} from "@mcp3/common";
 import {Transaction} from '@mysten/sui/transactions';
 import {SuiClient} from '@mysten/sui/client';
-import {
-    transactionToResource,
-    resolveWalletAddressOrThrow
-} from '@mcp3/sui-base';
+import {transactionToResource} from '@mcp3/sui-base';
 import {pool, Pool, PoolConfig, withdrawCoin} from 'navi-sdk'
 import {getCoinInfo} from "../coin_info.js";
 import {updateOraclePTB} from "navi-sdk";
@@ -22,11 +19,11 @@ export function registerNaviWithdrawTool(registration: Registration) {
         args: {
             coinType: z.string().describe('The coin type to withdraw (e.g., "0x2::sui::SUI")'),
             amount: z.number().describe('The amount to withdraw'),
-            walletAddress: z.string().optional().describe('The wallet address to use (optional, uses default if not provided)')
+            walletAddress: z.string().describe('The wallet address to use')
         },
         callback: async ({coinType, amount, walletAddress}, extra) => {
             try {
-                const sender = await resolveWalletAddressOrThrow(walletAddress);
+                const sender = walletAddress;
 
                 const coinInfo = getCoinInfo(coinType);
                 if (!coinInfo) {

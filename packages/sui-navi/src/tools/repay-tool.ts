@@ -2,7 +2,7 @@ import {z} from 'zod';
 import {Registration} from "@mcp3/common";
 import {Transaction} from '@mysten/sui/transactions';
 import {SuiClient} from '@mysten/sui/client';
-import {resolveWalletAddressOrThrow, transactionToResource} from '@mcp3/sui-base';
+import {transactionToResource} from '@mcp3/sui-base';
 import {pool, Pool, PoolConfig, repayDebt, returnMergedCoins} from 'navi-sdk'
 import {getCoinInfo} from "../coin_info.js";
 
@@ -17,11 +17,11 @@ export function registerRepayTool(registration: Registration) {
         args: {
             coinType: z.string().describe('The coin type to repay (e.g., "Sui", "USDC", "USDT")'),
             amount: z.number().describe('The amount to repay (in human-readable format, e.g., 10 for 10 SUI)'),
-            walletAddress: z.string().optional().describe('The wallet address to use (optional, uses default if not provided)')
+            walletAddress: z.string().describe('The wallet address to use')
         },
         callback: async ({coinType, amount, walletAddress}, extra) => {
             try {
-                const sender = await resolveWalletAddressOrThrow(walletAddress);
+                const sender = walletAddress;
 
                 const coinInfo = getCoinInfo(coinType);
                 if (!coinInfo) {

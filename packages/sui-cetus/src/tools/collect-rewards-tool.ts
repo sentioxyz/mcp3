@@ -2,7 +2,7 @@ import {Registration} from "@mcp3/common";
 import {z} from 'zod';
 import {initCetusSDK} from '@cetusprotocol/cetus-sui-clmm-sdk';
 import {SuiClient} from '@mysten/sui/client';
-import {getWalletManager, resolveWalletAddressOrThrow, transactionToResource} from '@mcp3/sui-base';
+import {transactionToResource} from '@mcp3/sui-base';
 
 /**
  * Register the collect rewards tool with the Registration
@@ -15,7 +15,7 @@ export function registerCollectRewardsTool(registration: Registration) {
         args: {
             positionId: z.string().describe('The position ID to collect rewards from'),
             collectFees: z.boolean().describe('Whether to also collect fees').default(false),
-            walletAddress: z.string().optional().describe('The wallet address to use (optional, uses default if not provided)')
+            walletAddress: z.string().describe('The wallet address to use')
         },
         callback: async ({positionId, collectFees, walletAddress}, extra) => {
             try {
@@ -25,7 +25,7 @@ export function registerCollectRewardsTool(registration: Registration) {
                     fullNodeUrl: registration.globalOptions.nodeUrl
                 });
 
-                const sender: string = await resolveWalletAddressOrThrow(walletAddress);
+                const sender: string = walletAddress;
                 // Get position information
                 const position = await sdk.Position.getPositionById(positionId);
 
