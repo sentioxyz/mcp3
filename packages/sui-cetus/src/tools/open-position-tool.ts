@@ -30,7 +30,7 @@ export function registerOpenPositionTools(registration: Registration) {
         });
 
         const sender: string = walletAddress;
-        sdk.senderAddress = sender
+
         // Get pool information
         const pool = await sdk.Pool.getPool(poolId);
 

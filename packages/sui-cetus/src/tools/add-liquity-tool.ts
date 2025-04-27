@@ -39,7 +39,7 @@ export function registerAddLiquidityTools(registration: Registration) {
                 });
 
                 const sender: string = walletAddress;
-                sdk.senderAddress = sender
+
                 // Get pool information
                 const pool = await sdk.Pool.getPool(poolId);
 
@@ -176,7 +176,6 @@ export function registerAddLiquidityTools(registration: Registration) {
                 });
 
                 const sender: string = walletAddress;
-                sdk.senderAddress = sender
 
                 // Get pool information
                 const pool = await sdk.Pool.getPool(poolId);
