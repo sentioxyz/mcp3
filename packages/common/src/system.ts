@@ -42,6 +42,7 @@ export class Registration {
     private serveOptionsFn: (CommandFn)[] = [];
     private commandFn: (CommandFn)[] = [];
     private afterStart: ((options: any) => void)[] = [];
+    private onClose: (() => void)[] = [];
     private tools: Record<string, Tool<any>> = {};
     private resources: Record<string, Resource> = {};
     private resourceTemplates: Record<string, TemplateResource> = {};
@@ -287,6 +288,16 @@ export class Registration {
 
     get globalOptions() {
         return this._program?.opts()
+    }
+
+    onServerClose(fn: () => void) {
+        this.onClose.push(fn)
+    }
+
+    closeServer() {
+        for (const fn of this.onClose) {
+            fn()
+        }
     }
 }
 
