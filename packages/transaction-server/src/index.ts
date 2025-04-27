@@ -1,6 +1,6 @@
 // Export server functionality
 import {Registration} from "@mcp3/common";
-import { startTransactionServer } from "./server.js";
+import { startTransactionServer, stopTransactionServer } from "./server.js";
 import { setServerUrl } from "./utils.js";
 
 export { startTransactionServer, stopTransactionServer } from './server.js';
@@ -11,7 +11,7 @@ import {Option} from "commander";
 
 export function register(registration: Registration) {
     registration.addServeOption((command) => {
-        command.option('-t, --enable-transaction-server', 'Start the transaction server for signing transactions', true);
+        command.option('-t, --enable-transaction-server', 'Start the transaction server for signing transactions', false);
         command.option('--transaction-server-url <url>', 'The url of transaction server', 'https://tx.mcp3.ai');
         command.addOption(new Option("--transaction-server-port <port>", "Port to listen on")
              .default(3000));
@@ -31,4 +31,7 @@ export function register(registration: Registration) {
         }
     });
 
+    registration.onServerClose(async () => {
+        await stopTransactionServer();
+    });
 }
