@@ -2,7 +2,7 @@ import {z} from 'zod';
 import {Registration} from "@mcp3/common";
 import {Transaction} from '@mysten/sui/transactions';
 import {SuiClient} from '@mysten/sui/client';
-import {resolveWalletAddressOrThrow, transactionToResource} from '@mcp3/sui-base';
+import {transactionToResource} from '@mcp3/sui-base';
 import {borrowCoin, pool, Pool, PoolConfig, updateOraclePTB} from 'navi-sdk'
 import {getCoinInfo} from "../coin_info.js";
 
@@ -17,12 +17,11 @@ export function registerBorrowTool(registration: Registration) {
         args: {
             coinType: z.string().describe('The coin type to borrow (e.g., "Sui", "USDC", "USDT")'),
             amount: z.number().describe('The amount to borrow (in human-readable format, e.g., 10 for 10 SUI)'),
-            walletAddress: z.string().optional().describe('The wallet address to use (optional, uses default if not provided)'),
-            updateOracle: z.boolean().optional().default(true).describe('Whether to update the oracle before borrowing (default: true)')
+            walletAddress: z.string().describe('The wallet address to use'),
         },
-        callback: async ({coinType, amount, walletAddress, updateOracle}, extra) => {
+        callback: async ({coinType, amount, walletAddress}, extra) => {
             try {
-                const sender = await resolveWalletAddressOrThrow(walletAddress);
+                const sender = walletAddress;
 
                 const coinInfo = getCoinInfo(coinType);
                 if (!coinInfo) {
@@ -44,11 +43,9 @@ export function registerBorrowTool(registration: Registration) {
                 const txb = new Transaction()
                 txb.setSender(sender)
 
-                // Update oracle if requested
-                if (updateOracle) {
-                    // @ts-ignore
-                    await updateOraclePTB(client, txb);
-                }
+               // @ts-ignore
+               await updateOraclePTB(client, txb);
+
 
                 const coinSymbol = coinInfo.symbol
                 const poolConfig: PoolConfig = pool[coinSymbol as keyof Pool];

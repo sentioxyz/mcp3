@@ -21,10 +21,8 @@ export async function main() {
   await startCli(registration);
 }
 
-// Run the CLI if this file is executed directly
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main().catch(err => {
-    console.error('Error in main:', err);
-    process.exit(1);
-  });
-}
+// Run the CLI
+main().catch(err => {
+  console.error('Error in main:', err);
+  process.exit(1);
+});

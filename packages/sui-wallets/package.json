@@ -1,6 +1,6 @@
 {
   "name": "@mcp3/sui-wallets",
-  "version": "1.0.1",
+  "version": "1.0.4",
   "description": "Wallet management tools for Sui Network in MCP3",
   "main": "build/index.js",
   "type": "module",
@@ -25,6 +25,7 @@
   "license": "MIT",
   "dependencies": {
     "@mcp3/common": "workspace:*",
+    "@mcp3/transaction-server": "workspace:*",
     "@mysten/sui": "~1.24.0",
     "@scure/bip39": "^1.2.2",
     "chalk": "^5.3.0",

@@ -9,7 +9,7 @@ import {
 } from '@cetusprotocol/cetus-sui-clmm-sdk';
 // @ts-ignore
 import BN from 'bn.js';
-import {resolveWalletAddressOrThrow, transactionToResource} from '@mcp3/sui-base';
+import {transactionToResource} from '@mcp3/sui-base';
 
 /**
  * Register the remove liquidity tool with the Registration
@@ -25,7 +25,7 @@ export function registerRemoveLiquidityTool(registration: Registration) {
             slippage: z.number().describe('The slippage tolerance percentage (e.g., 0.5 for 0.5%)').default(0.5),
             collectFee: z.boolean().describe('Whether to collect fees while removing liquidity').default(true),
             collectRewards: z.boolean().describe('Whether to collect rewards while removing liquidity').default(true),
-            walletAddress: z.string().optional().describe('The wallet address to use (optional, uses default if not provided)')
+            walletAddress: z.string().describe('The wallet address to use')
         },
         callback: async ({positionId, liquidity, slippage, collectFee, collectRewards, walletAddress}, extra) => {
             try {
@@ -36,7 +36,8 @@ export function registerRemoveLiquidityTool(registration: Registration) {
                 });
 
 
-                const sender: string = await resolveWalletAddressOrThrow(walletAddress);
+                const sender: string = walletAddress;
+                sdk.senderAddress = sender;
 
                 // Get position information
                 const position = await sdk.Position.getPositionById(positionId);

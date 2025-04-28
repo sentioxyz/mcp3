@@ -41,6 +41,8 @@ export class Registration {
     private globalOptionsFn: (CommandFn)[] = [];
     private serveOptionsFn: (CommandFn)[] = [];
     private commandFn: (CommandFn)[] = [];
+    private afterStart: ((options: any) => void)[] = [];
+    private onClose: (() => void)[] = [];
     private tools: Record<string, Tool<any>> = {};
     private resources: Record<string, Resource> = {};
     private resourceTemplates: Record<string, TemplateResource> = {};
@@ -163,6 +165,14 @@ export class Registration {
         return mcpServer;
     }
 
+    onServerStart(fn: (options: any) => void)  {
+        this.afterStart.push(fn);
+    }
+
+    afterServerStart(options: any)  {
+        this.afterStart.forEach(fn => fn(options));
+    }
+
     registerToolAsCommands(program: Command) {
         for (const [toolName, tool] of Object.entries(this.tools)) {
             let command = program.command(toolName)
@@ -271,12 +281,23 @@ export class Registration {
                     console.error(`Error executing ${toolName}: ${error instanceof Error ? error.message : String(error)}`);
                     process.exit(1);
                 }
+                process.exit(0)
             });
         }
     }
 
     get globalOptions() {
         return this._program?.opts()
+    }
+
+    onServerClose(fn: () => void) {
+        this.onClose.push(fn)
+    }
+
+    closeServer() {
+        for (const fn of this.onClose) {
+            fn()
+        }
     }
 }
 

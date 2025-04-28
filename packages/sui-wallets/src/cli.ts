@@ -3,6 +3,7 @@
 import {Registration, startCli} from "@mcp3/common";
 import {registerWalletsTools} from "./tools/index.js";
 import {registerWalletsResource} from "./resources/wallets-resource.js";
+import {register as registerTxServer} from '@mcp3/transaction-server'
 
 if (import.meta.url === `file://${process.argv[1]}`) {
     const registration = Registration.create("mcp3-sui-wallets", "Sui Wallet Management", "1.0.0");
@@ -12,8 +13,10 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         command.option('-c, --wallet-config <walletConfig>', 'Path to wallet configuration file', process.env.SUI_WALLET_CONFIG_PATH);
     });
 
+    // Register tools and resources
     registerWalletsTools(registration);
     registerWalletsResource(registration);
+    registerTxServer(registration);
 
     startCli(registration).catch(err => {
         console.error('Error in main:', err);

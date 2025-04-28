@@ -1,11 +1,10 @@
 {
   "name": "@mcp3/sui",
-  "version": "1.0.1",
+  "version": "1.0.14",
   "description": "Model Context Protocol implementation for Sui Network",
   "main": "build/index.js",
   "type": "module",
   "bin": {
-    "sui-mcp": "build/cli/index.js",
     "mcp3-sui": "build/cli/index.js"
   },
   "scripts": {
@@ -47,6 +46,8 @@
   "peerDependencies": {
     "@mcp3/sui-navi": "workspace:*",
     "@mcp3/sui-cetus": "workspace:*",
-    "@mcp3/defilama": "workspace:*"
+    "@mcp3/defilama": "workspace:*",
+    "@mcp3/dex-screener": "workspace:*",
+    "@mcp3/transaction-server": "workspace:*"
   }
 }

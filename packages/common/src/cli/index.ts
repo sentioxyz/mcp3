@@ -35,11 +35,3 @@ export async function startCli(registration: Registration) {
 
     program.parse(process.argv);
 }
-
-// Call main function if this file is being run directly
-if (import.meta.url === `file://${process.argv[1]}`) {
-    startCli(Registration.create("mcp3", "Model Context Protocol", "1.0.0")).catch(err => {
-        console.error('Error in main:', err);
-        process.exit(1);
-    });
-}

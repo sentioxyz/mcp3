@@ -45,15 +45,9 @@ export function resolveWalletAddress(walletManager: IWalletManager | null, walle
     }
 }
 
-/**
- * Get a wallet address from a wallet manager with error handling
- * @param walletManager The wallet manager instance
- * @param walletAddress Optional wallet address or name to use (uses default if not provided)
- * @returns The resolved wallet address
- * @throws Error if no wallet address could be resolved
- */
-export async function resolveWalletAddressOrThrow(walletAddress?: string): Promise<string> {
-    const {nodeUrl, walletConfig} = Registration.getInstance().globalOptions;
+
+export async function resolveWalletAddressOrThrow(registration: Registration, walletAddress?: string): Promise<string> {
+    const {nodeUrl, walletConfig} = registration.globalOptions;
     const walletManager = await getWalletManager({
         nodeUrl,
         walletConfig

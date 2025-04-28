@@ -4,7 +4,7 @@ import {ClmmPoolUtil, initCetusSDK, TickMath} from '@cetusprotocol/cetus-sui-clm
 // @ts-ignore
 import BN from 'bn.js';
 import {SuiClient} from '@mysten/sui/client';
-import {getWalletManager, resolveWalletAddressOrThrow, transactionToResource} from '@mcp3/sui-base';
+import {transactionToResource} from '@mcp3/sui-base';
 
 
 /**
@@ -19,7 +19,7 @@ export function registerOpenPositionTools(registration: Registration) {
       poolId: z.string().describe('The pool ID to open a position in'),
       tickLower: z.string().optional().describe('The lower tick boundary (optional, will use current tick - tickSpacing if not provided)'),
       tickUpper: z.string().optional().describe('The upper tick boundary (optional, will use current tick + tickSpacing if not provided)'),
-      walletAddress: z.string().optional().describe('The wallet address to use (optional, uses default if not provided)')
+      walletAddress: z.string().describe('The wallet address to use')
     },
     callback: async ({poolId, tickLower, tickUpper, walletAddress}, extra) => {
       try {
@@ -29,14 +29,8 @@ export function registerOpenPositionTools(registration: Registration) {
           fullNodeUrl: registration.globalOptions.nodeUrl
         });
 
-        // Get a wallet manager
-        const walletManager = await getWalletManager({
-          nodeUrl: registration.globalOptions.nodeUrl,
-          walletConfig: registration.globalOptions.walletConfig
-        });
-
-        const sender: string = await resolveWalletAddressOrThrow(walletAddress);
-
+        const sender: string = walletAddress;
+        sdk.senderAddress = sender
         // Get pool information
         const pool = await sdk.Pool.getPool(poolId);
 
@@ -107,7 +101,7 @@ export function registerOpenPositionTools(registration: Registration) {
       amount: z.string().describe('The amount of coin to add (fixed coin A or B based on fixAmountA)'),
       slippage: z.number().describe('The slippage tolerance percentage (e.g., 0.5 for 0.5%)').default(0.5),
       collectFee: z.boolean().describe('Whether to collect fees (only applicable if adding to an existing position)').default(false),
-      walletAddress: z.string().optional().describe('The wallet address to use (optional, uses default if not provided)')
+      walletAddress: z.string().describe('The wallet address to use')
     },
     callback: async ({poolId, tickLower, tickUpper, fixAmountA, amount, slippage, collectFee, walletAddress}, extra) => {
       try {
@@ -117,28 +111,7 @@ export function registerOpenPositionTools(registration: Registration) {
           fullNodeUrl: registration.globalOptions.nodeUrl
         });
 
-        // Get a wallet manager
-        const walletManager = await getWalletManager({
-          nodeUrl: registration.globalOptions.nodeUrl,
-          walletConfig: registration.globalOptions.walletConfig
-        });
-
-        let sender: string;
-        if (walletAddress) {
-          sender = walletManager?.getWallet(walletAddress)?.address ?? walletAddress;
-        } else {
-          sender = walletManager?.getDefaultWallet()?.address ?? '';
-        }
-
-        if (!sender) {
-          return {
-            content: [{
-              type: 'text',
-              text: 'No wallet address provided and no default wallet address configured.'
-            }],
-            isError: true
-          };
-        }
+        const sender: string = walletAddress;
 
         // Get pool information
         const pool = await sdk.Pool.getPool(poolId);

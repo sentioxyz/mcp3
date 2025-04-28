@@ -1,22 +1,19 @@
 #!/usr/bin/env node
 
 import {Registration, startCli} from "@mcp3/common";
-import {addSuiGlobalOptions, register} from "@mcp3/sui-base";
-import {registerSubProjects} from "../index.js";
+import {addSuiGlobalOptions, register as RegisterBase} from "@mcp3/sui-base";
+import {registerSubProjects} from "../register.js";
 
-if (import.meta.url === `file://${process.argv[1]}`) {
-  const registration = Registration.create("mcp3-sui", "Sui Model Context Protocol", "1.0.0" );
+const registration = Registration.create("mcp3-sui", "Sui Model Context Protocol", "1.0.12" );
 
-  // Add global options from sui-base
-  addSuiGlobalOptions(registration);
+// Add global options from sui-base
+addSuiGlobalOptions(registration);
+RegisterBase(registration);
 
-  register(registration);
-
-  // Register sub-projects
-  registerSubProjects(registration).then(() => {
-    startCli(registration).catch(err => {
-      console.error('Error in main:', err);
-      process.exit(1);
-    });
+// Register sub-projects
+registerSubProjects(registration).then(() => {
+  startCli(registration).catch(err => {
+    console.error('Error in main:', err);
+    process.exit(1);
   });
-}
+});
