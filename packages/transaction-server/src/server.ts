@@ -6,7 +6,7 @@ import fs from 'fs';
 import {fileURLToPath} from 'url';
 import {ServerConfig, DEFAULT_CONFIG, getServerUrl} from './config.js';
 import {setServerUrl} from './utils.js';
-import {transactionStore} from './transaction-store.js';
+import {transactionStore} from '@mcp3/common';
 import {Transaction} from "@mysten/sui/transactions";
 import {Server} from "node:http";
 

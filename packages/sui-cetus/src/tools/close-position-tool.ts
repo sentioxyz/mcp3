@@ -24,7 +24,7 @@ export function registerClosePositionTool(registration: Registration) {
         args: {
             positionId: z.string().describe('The position ID to close'),
             slippage: z.number().describe('The slippage tolerance percentage (e.g., 0.5 for 0.5%)').default(0.5),
-             walletAddress: z.string().describe('The wallet address to use'),
+            walletAddress: z.string().describe('The wallet address to use'),
             collect_fee: z.boolean().optional().default(false).describe('Collect fee while closing the position'),
             collect_rewards: z.boolean().optional().default(true).describe('Collect rewards while closing the position')
         },
@@ -37,6 +37,7 @@ export function registerClosePositionTool(registration: Registration) {
                 });
 
                 const sender: string = walletAddress;
+                sdk.senderAddress = sender;
 
                 // Get position information
                 const position = await sdk.Position.getPositionById(positionId);
@@ -65,7 +66,7 @@ export function registerClosePositionTool(registration: Registration) {
 
                 // Apply slippage tolerance for minimum amounts
                 const slippagePercentage = new Percentage(new BN(slippage), new BN(100));
-                const { tokenMaxA, tokenMaxB } = adjustForCoinSlippage(
+                const {tokenMaxA, tokenMaxB} = adjustForCoinSlippage(
                     coinAmounts,
                     slippagePercentage,
                     false
