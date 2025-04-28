@@ -14,7 +14,7 @@ interface PendingTransaction {
  * This is a singleton that will be used across API routes
  * Transactions are stored as JSON files in a temporary directory
  */
-class TransactionStore {
+export class TransactionStore {
   private txDir: string;
   private cleanupInterval: NodeJS.Timeout | null = null;
 

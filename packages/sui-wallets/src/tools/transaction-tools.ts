@@ -1,4 +1,4 @@
-import { Registration } from '@mcp3/common';
+import { Registration, transactionStore } from '@mcp3/common';
 import { z } from 'zod';
 import { WalletManager } from '../manager/index.js';
 import { Transaction } from '@mysten/sui/transactions';
@@ -29,14 +29,29 @@ export function registerTransactionTools(registration: Registration) {
     description: 'Sign a transaction with a wallet',
     args: {
       identifier: z.string().describe('The wallet address or name to sign with (optional, uses default if not provided)').optional(),
-      transactionBytes: z.string().describe('The transaction bytes to sign (base64 encoded)')
+      transactionId: z.string().optional().describe('The transaction ID in the transaction store to sign').optional(),
+      transactionBytes: z.string().optional().describe('The transaction bytes to sign (base64 encoded), use this if transactionId is not stored in the transaction store')
     },
-    callback: async ({ identifier, transactionBytes }, _extra) => {
+    callback: async ({ identifier, transactionId, transactionBytes }, _extra) => {
       try {
         const walletManager = new WalletManager({
           nodeUrl: registration.globalOptions.nodeUrl,
           walletConfig: registration.globalOptions.walletConfig
         });
+
+        // If transactionId is provided but not transactionBytes, try to get it from the store
+        if (transactionId && !transactionBytes) {
+          const storedTx = transactionStore.getTransaction(transactionId);
+          if (!storedTx) {
+            throw new Error(`Transaction with ID ${transactionId} not found in the transaction store`);
+          }
+          transactionBytes = storedTx.txBytes;
+        }
+
+        // Ensure we have transaction bytes at this point
+        if (!transactionBytes) {
+          throw new Error('Either transactionId or transactionBytes must be provided');
+        }
 
         // Create transaction block from bytes
         const txBlock = Transaction.from(transactionBytes);
@@ -96,14 +111,29 @@ export function registerTransactionTools(registration: Registration) {
     description: 'Sign and execute a transaction with a wallet',
     args: {
       identifier: z.string().describe('The wallet address or name to sign with (optional, uses default if not provided)').optional(),
-      transactionBytes: z.string().describe('The transaction bytes to sign and execute (base64 encoded)')
+      transactionId: z.string().describe('The transaction ID in the transaction store to sign and execute').optional(),
+      transactionBytes: z.string().describe('The transaction bytes to sign and execute (base64 encoded), use this if transactionId is not stored in the transaction store').optional()
     },
-    callback: async ({ identifier, transactionBytes }, _extra) => {
+    callback: async ({ identifier, transactionId, transactionBytes }, _extra) => {
       try {
         const walletManager = new WalletManager({
           nodeUrl: registration.globalOptions.nodeUrl,
           walletConfig: registration.globalOptions.walletConfig
         });
+
+        // If transactionId is provided but not transactionBytes, try to get it from the store
+        if (transactionId && !transactionBytes) {
+          const storedTx = transactionStore.getTransaction(transactionId);
+          if (!storedTx) {
+            throw new Error(`Transaction with ID ${transactionId} not found in the transaction store`);
+          }
+          transactionBytes = storedTx.txBytes;
+        }
+
+        // Ensure we have transaction bytes at this point
+        if (!transactionBytes) {
+          throw new Error('Either transactionId or transactionBytes must be provided');
+        }
 
         // Create transaction block from bytes
         const txBlock = Transaction.from(transactionBytes);

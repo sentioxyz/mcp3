@@ -78,7 +78,7 @@ export function registerTools(registration: Registration) {
             const baseUrl = registration.globalOptions.defilamaEndpoint;
             const uri = `${baseUrl}/protocol/${encodeURIComponent(protocol)}`;
             try {
-                const pagedResult: string = await withCachedResult(uri, page, 1048000, async () => {
+                const pagedResult: string = await withCachedResult(uri, page, 512000, async () => {
                     const client = createClient<paths>({baseUrl});
                     const {
                         data,
@@ -94,12 +94,9 @@ export function registerTools(registration: Registration) {
                 })
                 return {
                     content: [{
-                        type: "resource",
-                        resource: [{
-                            uri: uri+`?page=${page}`,
-                            mimeType: "text/markdown",
-                            text: pagedResult
-                        }],
+                        type: "text",
+                        text: pagedResult,
+
                     }]
                 } as any
             } catch (e) {

@@ -12,5 +12,5 @@ export async function withCachedResult(key: string, page: number, pageSize: numb
     const paged =  result.slice(page * pageSize, (page + 1) * pageSize);
     const totalPages = Math.ceil(result.length / pageSize);
 
-    return paged + `... #${page}/${totalPages} pages`;
+    return paged + `\n\n ... #${page+1}/${totalPages} pages`;
 }

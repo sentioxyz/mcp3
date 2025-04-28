@@ -24,6 +24,7 @@ export function registerCollectFeesTool(registration: Registration) {
                     fullNodeUrl: registration.globalOptions.nodeUrl
                 });
                 const sender: string = walletAddress;
+                sdk.senderAddress = sender;
 
                 // Get position information
                 const position = await sdk.Position.getPositionById(positionId);
