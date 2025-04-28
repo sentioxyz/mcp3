@@ -5,7 +5,7 @@ import {Button} from '@/components/ui/button';
 interface TransactionSigningProps {
     txId: string | null;
     txBytes: string | null;
-    submitTransaction: (signature: string) => Promise<boolean>;
+    submitTransaction: (signature: string) => Promise<boolean | string>;
     isSubmitting: boolean;
 }
 
@@ -17,6 +17,7 @@ export const TransactionSigning: React.FC<TransactionSigningProps> = ({
     const {mutateAsync: signTransaction} = useSignTransaction();
     const {currentWallet} = useCurrentWallet();
     const [status, setStatus] = useState<{ message: string; type: 'info' | 'success' | 'error' } | null>(null);
+    const [txDigest, setTxDigest] = useState<string | null>(null);
     const account = useCurrentAccount();
 
     const handleSignTransaction = async () => {
@@ -48,18 +49,26 @@ export const TransactionSigning: React.FC<TransactionSigningProps> = ({
                 type: 'info'
             });
 
-            const success = await submitTransaction(signature);
+            const result = await submitTransaction(signature);
 
-            if (success) {
+            if (typeof result === 'string') {
                 setStatus({
                     message: 'Transaction submitted successfully to the Sui network!',
                     type: 'success'
                 });
+                setTxDigest(result);
+            } else if (result === true) {
+                setStatus({
+                    message: 'Transaction submitted successfully to the Sui network!',
+                    type: 'success'
+                });
+                setTxDigest(null);
             } else {
                 setStatus({
                     message: 'Failed to submit transaction to the Sui network',
                     type: 'error'
                 });
+                setTxDigest(null);
             }
         } catch (error) {
             console.error('Error signing transaction:', error);
@@ -67,6 +76,7 @@ export const TransactionSigning: React.FC<TransactionSigningProps> = ({
                 message: `Error signing transaction: ${error instanceof Error ? error.message : String(error)}`,
                 type: 'error'
             });
+            setTxDigest(null);
         }
     };
 
@@ -93,10 +103,20 @@ export const TransactionSigning: React.FC<TransactionSigningProps> = ({
                     }`}
                 >
                     {status.message}
+                    {status.type === 'success' && txDigest && (
+                        <div className="mt-2">
+                            <a
+                                href={`https://suiscan.xyz/tx/${txDigest}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="underline text-blue-700 hover:text-blue-900"
+                            >
+                                View on Suiscan
+                            </a>
+                        </div>
+                    )}
                 </div>
             )}
-
-
         </div>
     );
 };
