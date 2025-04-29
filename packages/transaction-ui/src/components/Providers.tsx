@@ -17,7 +17,7 @@ export function Providers({ children }: {children: any}  ) {
   return (
     <QueryClientProvider client={queryClient}>
       <SuiClientProvider networks={networkConfig} defaultNetwork="mainnet">
-        <WalletProvider>
+        <WalletProvider storageKey="sui-wallet-connection" autoConnect>
           {children}
         </WalletProvider>
       </SuiClientProvider>

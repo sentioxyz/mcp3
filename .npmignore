@@ -1,0 +1,36 @@
+# Ignore build and test outputs
+build/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Ignore environment files
+.env
+.env.local
+.env.*.local
+
+# Ignore logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Ignore editor and OS files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Ignore dependency folders
+node_modules/
+.pnpm-store/
+
+# Ignore monorepo-specific files
+pnpm-lock.yaml
+
+# Ignore scripts and configs not needed in package
+init-monorepo.sh
+bump-versions.js
+
+# Ignore workspace build outputs
+packages/**/build

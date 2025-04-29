@@ -7,8 +7,10 @@ import {
 } from "@modelcontextprotocol/sdk/server/mcp.js";
 import {Command} from 'commander';
 import {z, ZodRawShape, ZodTypeAny} from "zod";
-import {CallToolResult} from "@modelcontextprotocol/sdk/types.js";
+import {CallToolResult, ServerNotification, ServerRequest} from "@modelcontextprotocol/sdk/types.js";
 import {RequestHandlerExtra} from "@modelcontextprotocol/sdk/shared/protocol.js";
+
+
 
 
 type CommandFn = (command: Command) => void;
@@ -17,16 +19,16 @@ interface ToolWithArgs<Args extends ZodRawShape> {
     name: string,
     description: string,
     args: Args
-    callback: (args: z.objectOutputType<Args, ZodTypeAny>, extra: RequestHandlerExtra) => CallToolResult | Promise<CallToolResult>
+    callback: (args: z.objectOutputType<Args, ZodTypeAny>, extra?: RequestHandlerExtra<ServerRequest, ServerNotification>) => CallToolResult | Promise<CallToolResult>
 }
 
 interface ToolWithoutArgs {
     name: string,
     description: string,
-    callback: (extra: RequestHandlerExtra) => CallToolResult | Promise<CallToolResult>;
+    callback: (extra?: RequestHandlerExtra<ServerRequest, ServerNotification>) => CallToolResult | Promise<CallToolResult>;
 }
 
-type Tool<Args extends undefined | ZodRawShape> = Args extends ZodRawShape ? ToolWithArgs<Args> : ToolWithoutArgs;
+export type Tool<Args extends undefined | ZodRawShape> = Args extends ZodRawShape ? ToolWithArgs<Args> : ToolWithoutArgs;
 
 type Resource = { name: string, uri: string, metadata?: ResourceMetadata, callback: ReadResourceCallback };
 type TemplateResource = {
@@ -43,7 +45,7 @@ export class Registration {
     private commandFn: (CommandFn)[] = [];
     private afterStart: ((options: any) => void)[] = [];
     private onClose: (() => void)[] = [];
-    private tools: Record<string, Tool<any>> = {};
+    protected tools: Record<string, Tool<any>> = {};
     private resources: Record<string, Resource> = {};
     private resourceTemplates: Record<string, TemplateResource> = {};
     private _serverOptions: any;
@@ -86,7 +88,7 @@ export class Registration {
     /**
      * Private constructor to enforce singleton pattern
      */
-    private constructor(name: string, description: string, version: string) {
+    protected constructor(name: string, description: string, version: string) {
         this.name = name;
         this.description = description;
         this.version = version;
@@ -232,8 +234,13 @@ export class Registration {
                         }
                     }
 
+                    const sendNotification = async(_:any): Promise<void> => {}
+                    const sendRequest = async(_:ServerRequest, _2: any): Promise<any> => {}
+
                     const result = await tool.callback(processedOptions, {
-                        signal: controller.signal
+                        signal: controller.signal,
+                        sendNotification,
+                        sendRequest
                     });
                     if (result && result.content) {
                         // Check if the content is an array with a single item
@@ -323,6 +330,4 @@ function getDefaults(schema: ZodTypeAny) {
     }
     return undefined
 }
-
-
 

@@ -21,7 +21,8 @@
     "**/*.css"
   ],
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently \"vite\" \"pnpm run start-tx-server\"",
+    "start-tx-server": "transaction-server start --port 3000",
     "build": "tsc -b && vite build",
     "prepublishOnly": "rm -rf dist && npm run build",
     "lint": "eslint .",
@@ -48,7 +49,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.503.0",
-    "react-router-dom": "^7.5.1",
+    "react-router-dom": "^7.5.2",
     "tailwind-merge": "^3.2.0",
     "tailwindcss-animate": "^1.0.7"
   },
@@ -58,11 +59,13 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
+    "@mcp3/transaction-server": "workspace:*",
     "@types/node": "^22.14.1",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.21",
+    "concurrently": "^9.1.2",
     "eslint": "^9.22.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
