@@ -1,0 +1,111 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      releaseType:
+        description: 'Release type (patch, minor, major)'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+          
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+      
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Cache pnpm modules
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build packages
+        run: |
+          pnpm --filter @mcp3/common build
+          pnpm --filter "!@mcp3/common" build
+
+      - name: Run tests
+        run: pnpm test
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump versions of changed packages
+        id: version-bump
+        run: |
+          # Get release type from workflow input or use patch as default
+          RELEASE_TYPE="${{ github.event.inputs.releaseType || 'patch' }}"
+          echo "Using release type: $RELEASE_TYPE"
+          
+          # Run the version bump script
+          node ./bump-versions.js --type=$RELEASE_TYPE
+          
+          # Store the list of changed packages
+          CHANGED_PACKAGES=$(git diff --name-only | grep 'package.json' | xargs -n1 dirname | sort -u)
+          echo "changed_packages=${CHANGED_PACKAGES}" >> $GITHUB_OUTPUT
+
+      - name: Commit version changes
+        run: |
+          git add .
+          git commit -m "chore: bump versions [skip ci]" || echo "No changes to commit"
+          git push
+
+      - name: Publish to NPM
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          # Publish all changed packages
+          for pkg in ${{ steps.version-bump.outputs.changed_packages }}; do
+            if [[ -f "$pkg/package.json" ]]; then
+              echo "Publishing package in $pkg"
+              cd $pkg
+              pnpm publish --no-git-checks --access public
+              cd -
+            fi
+          done
+
+      - name: Create release tags
+        run: |
+          # Make the script executable
+          chmod +x ./create-release-tags.js
+          # Create Git tags for each released package
+          node ./create-release-tags.js
