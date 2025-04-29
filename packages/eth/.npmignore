@@ -1,0 +1,34 @@
+# Source files
+src/
+!build/
+
+# Test files
+src/tests/
+**/*.test.ts
+**/*.spec.ts
+**/__tests__/
+**/__mocks__/
+
+# Development files
+.eslintrc.js
+.prettierrc
+.vscode/
+node_modules/
+.git/
+.github/
+.gitignore
+.DS_Store
+
+# Build files
+coverage/
+.nyc_output/
+*.log
+*.tsbuildinfo
+
+# Config files
+tsconfig.json
+tsconfig.*.json
+
+# Environment files
+.env
+.env.example
