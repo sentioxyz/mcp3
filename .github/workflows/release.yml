@@ -78,30 +78,18 @@ jobs:
           
           # Run the version bump script
           node ./bump-versions.js --type=$RELEASE_TYPE
-          
-          # Store the list of changed packages
-          CHANGED_PACKAGES=$(git diff --name-only | grep 'package.json' | xargs -n1 dirname | sort -u)
-          echo "changed_packages=${CHANGED_PACKAGES}" >> $GITHUB_OUTPUT
 
       - name: Commit version changes
         run: |
           git add .
-          git commit -m "chore: bump versions [skip ci]" || echo "No changes to commit"
+          git commit -m "chore: bump versions"
           git push
 
       - name: Publish to NPM
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          # Publish all changed packages
-          for pkg in ${{ steps.version-bump.outputs.changed_packages }}; do
-            if [[ -f "$pkg/package.json" ]]; then
-              echo "Publishing package in $pkg"
-              cd $pkg
-              pnpm publish --no-git-checks --access public
-              cd -
-            fi
-          done
+          pnpm publish -r --no-git-checks --access public
 
       - name: Create release tags
         run: |
