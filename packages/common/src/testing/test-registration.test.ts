@@ -1,6 +1,6 @@
 import { describe, it, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert';
-import { TestRegistration } from '../system.js';
+import { TestRegistration } from './system-test.js';
 import { z } from 'zod';
 
 describe('TestRegistration', () => {
@@ -31,7 +31,7 @@ describe('TestRegistration', () => {
       description: 'A test tool',
       callback: async () => {
         return {
-          content: [{ type: 'text', text: 'Test tool called' }]
+          content: [{ type: "text" as const, text: 'Test tool called' }]
         };
       }
     });
@@ -57,7 +57,7 @@ describe('TestRegistration', () => {
       callback: async ({ name, count }) => {
         return {
           content: [{ 
-            type: 'text', 
+            type: "text" as const, 
             text: `Tool called with name: ${name}, count: ${count}` 
           }]
         };
@@ -94,7 +94,7 @@ describe('TestRegistration', () => {
       description: 'A test tool',
       callback: async () => {
         return {
-          content: [{ type: 'text', text: 'Test tool called' }]
+          content: [{ type: "text" as const, text: 'Test tool called' }]
         };
       }
     });

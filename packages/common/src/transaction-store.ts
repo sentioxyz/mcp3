@@ -16,14 +16,11 @@ interface PendingTransaction {
  */
 export class TransactionStore {
   private txDir: string;
-  private cleanupInterval: NodeJS.Timeout | null = null;
 
   constructor(private expirationTimeMs: number = 30 * 60 * 1000) {
     // Create a temporary directory for storing transactions
     this.txDir = path.join(os.tmpdir(), 'txs');
     fs.mkdirSync(this.txDir, { recursive: true });
-    // Start cleanup interval
-    this.startCleanupInterval();
   }
 
   /**
@@ -54,6 +51,7 @@ export class TransactionStore {
    * @returns The pending transaction or undefined if not found
    */
   getTransaction(txId: string): PendingTransaction | undefined {
+    this.cleanupExpiredTransactions()
     try {
       const filePath = this.getFilePath(txId);
 
@@ -116,26 +114,6 @@ export class TransactionStore {
    */
   private getFilePath(txId: string): string {
     return path.join(this.txDir, `${txId}.json`);
-  }
-
-  /**
-   * Start the cleanup interval
-   */
-  private startCleanupInterval(): void {
-    // Clean up every 5 minutes
-    this.cleanupInterval = setInterval(() => {
-      this.cleanupExpiredTransactions();
-    }, 5 * 60 * 1000);
-  }
-
-  /**
-   * Stop the cleanup interval
-   */
-  stopCleanupInterval(): void {
-    if (this.cleanupInterval) {
-      clearInterval(this.cleanupInterval);
-      this.cleanupInterval = null;
-    }
   }
 }
 

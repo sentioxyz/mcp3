@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "clean": "rm -rf build"
+    "clean": "rm -rf build",
+    "test": "glob -c 'tsx --test' '**/*.test.ts'"
   },
   "keywords": [
     "sui",
@@ -18,7 +19,7 @@
   "license": "MIT",
   "dependencies": {
     "@mcp3/common": "workspace:*",
-    "@modelcontextprotocol/sdk": "^1.9.0",
+    "@modelcontextprotocol/sdk": "^1.10.2",
     "@mysten/sui": "~1.24.0",
     "@typemove/sui": "^1.9.0",
     "chalk": "^5.3.0",
@@ -28,7 +29,8 @@
   },
   "devDependencies": {
     "@types/node": "^20.8.9",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "tsx": "^4.15.2"
   },
   "peerDependencies": {
     "@mcp3/sui-wallets": "workspace:*"

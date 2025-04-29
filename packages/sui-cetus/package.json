@@ -25,7 +25,7 @@
   "dependencies": {
     "@mcp3/common": "workspace:*",
     "@mcp3/sui-base": "workspace:*",
-    "@modelcontextprotocol/sdk": "^1.9.0",
+    "@modelcontextprotocol/sdk": "^1.10.2",
     "@mysten/sui": "~1.24.0",
     "@cetusprotocol/cetus-sui-clmm-sdk": "^5.1.9",
     "chalk": "^4.1.2",
