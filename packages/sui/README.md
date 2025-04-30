@@ -2,6 +2,9 @@
 
 A TypeScript implementation of the Model Context Protocol for the Sui Network.
 
+[![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/sentioxyz/mcp3)
+
+
 ## Features
 
 - MCP server for integration with AI assistants
