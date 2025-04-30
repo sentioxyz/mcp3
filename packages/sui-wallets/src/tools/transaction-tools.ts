@@ -56,42 +56,38 @@ export function registerTransactionTools(registration: Registration) {
         // Create transaction block from bytes
         const txBlock = Transaction.from(transactionBytes);
 
-        try {
-          // Sign the transaction
-          const signedTx = await walletManager.signTransaction(identifier, txBlock);
+        // Check if wallet exists and has a keypair
+        const wallet = walletManager.getWallet(identifier);
 
+        // If wallet doesn't exist or doesn't have a keypair, use transaction server
+        if (!wallet || !wallet.keypair) {
+          // Determine the address to use
+          const address = wallet ? wallet.address : (identifier || 'unknown');
+
+          // Register the transaction with the server
+          const result = await registerTransactionWithServer(transactionBytes, address);
+
+          // Return the URL for external signing
           return {
             content: [{
               type: 'text',
-              text: JSON.stringify({
-                bytes: signedTx.bytes,
-                signature: signedTx.signature
-              }, null, 2)
+              text: `This wallet requires external signing. Please open the following URL in your browser:\n\n${result.url}\n\n`
             }]
           };
-        } catch (error) {
-          // If the wallet doesn't have a keypair, register the transaction with the server
-          if (error instanceof Error && error.message.includes('does not have a keypair')) {
-            // Get the wallet to get its address
-            const wallet = walletManager.getWallet(identifier);
-            if (!wallet) {
-              throw new Error('Wallet not found');
-            }
-
-            // Register the transaction with the server
-            const result = await registerTransactionWithServer(transactionBytes, wallet.address);
-
-            // Return the URL for external signing
-            return {
-              content: [{
-                type: 'text',
-                text: `This wallet requires external signing. Please open the following URL in your browser:\n\n${result.url}\n\n`
-              }]
-            };
-          }
-          // Rethrow other errors
-          throw error;
         }
+
+        // If wallet exists and has a keypair, sign the transaction
+        const signedTx = await walletManager.signTransaction(identifier, txBlock);
+
+        return {
+          content: [{
+            type: 'text',
+            text: JSON.stringify({
+              bytes: signedTx.bytes,
+              signature: signedTx.signature
+            }, null, 2)
+          }]
+        };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         return {
@@ -138,43 +134,39 @@ export function registerTransactionTools(registration: Registration) {
         // Create transaction block from bytes
         const txBlock = Transaction.from(transactionBytes);
 
-        try {
-          // Sign and execute the transaction
-          const result = await walletManager.signAndExecuteTransaction(identifier, txBlock);
+        // Check if wallet exists and has a keypair
+        const wallet = walletManager.getWallet(identifier);
 
+        // If wallet doesn't exist or doesn't have a keypair, use transaction server
+        if (!wallet || !wallet.keypair) {
+          // Determine the address to use
+          const address = wallet ? wallet.address : (identifier || 'unknown');
+
+          // Register the transaction with the server
+          const result = await registerTransactionWithServer(transactionBytes, address);
+
+          // Return the URL for external signing
           return {
             content: [{
-              type: 'resource',
-              resource: {
-                uri: `sui://tx/${result.digest}`,
-                mimeType: 'application/json',
-                text: JSON.stringify(result, null, 2)
-              },
+              type: 'text',
+              text: `This wallet requires external signing. Please open the following URL in your browser:\n\n${result.url}\n\n`
             }]
           };
-        } catch (error) {
-          // If the wallet doesn't have a keypair, register the transaction with the server
-          if (error instanceof Error && error.message.includes('does not have a keypair')) {
-            // Get the wallet to get its address
-            const wallet = walletManager.getWallet(identifier);
-            if (!wallet) {
-              throw new Error('Wallet not found');
-            }
-
-            // Register the transaction with the server
-            const result = await registerTransactionWithServer(transactionBytes, wallet.address);
-
-            // Return the URL for external signing
-            return {
-              content: [{
-                type: 'text',
-                text: `This wallet requires external signing. Please open the following URL in your browser:\n\n${result.url}\n\n`
-              }]
-            };
-          }
-          // Rethrow other errors
-          throw error;
         }
+
+        // If wallet exists and has a keypair, sign and execute the transaction
+        const result = await walletManager.signAndExecuteTransaction(identifier, txBlock);
+
+        return {
+          content: [{
+            type: 'resource',
+            resource: {
+              uri: `sui://tx/${result.digest}`,
+              mimeType: 'application/json',
+              text: JSON.stringify(result, null, 2)
+            },
+          }]
+        };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         return {
