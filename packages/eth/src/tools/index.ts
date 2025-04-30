@@ -6,7 +6,7 @@ import {registerInvokeTool} from "./invoke-tool.js";
 import path from "path";
 import fs from "fs";
 
-export function registerEthTools(registration: Registration) {
+export async function registerEthTools(registration: Registration) {
     // Register tools
     registerAbiTool(registration);
     registerDownloadCodeTool(registration);

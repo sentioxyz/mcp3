@@ -1,24 +1,29 @@
 #!/usr/bin/env node
 
 import {Registration, startCli} from "@mcp3/common";
-import {registerWalletsTools} from "./tools/index.js";
-import {registerWalletsResource} from "./resources/wallets-resource.js";
+import {registerWalletsTools, registerWalletsResource, registerGlobalOptions} from "./index.js";
 import {register as registerTxServer} from '@mcp3/transaction-server'
+import {addSuiGlobalOptions} from "@mcp3/sui-base";
 
 if (import.meta.url === `file://${process.argv[1]}`) {
     const registration = Registration.create("mcp3-sui-wallets", "Sui Wallet Management", "1.0.0");
 
-    registration.addGlobalOption((command) => {
-        command.option('-e, --node-url <nodeUrl>', 'Sui RPC Endpoint URL', process.env.SUI_RPC_URL || 'https://fullnode.mainnet.sui.io:443');
-        command.option('-c, --wallet-config <walletConfig>', 'Path to wallet configuration file', process.env.SUI_WALLET_CONFIG_PATH);
-    });
+    // Register global options
+    addSuiGlobalOptions(registration);
+    registerGlobalOptions(registration);
 
-    // Register tools and resources
-    registerWalletsTools(registration);
-    registerWalletsResource(registration);
-    registerTxServer(registration);
+    // Create a callback function to register tools
+    const registerTools = async (reg: Registration) => {
+        // Register tools and resources
+        registerWalletsTools(reg);
+        registerWalletsResource(reg);
+        registerTxServer(reg);
+    };
 
-    startCli(registration).catch(err => {
+    // Register tools immediately for the main CLI
+    registerTools(registration);
+
+    startCli(registration, registerTools).catch(err => {
         console.error('Error in main:', err);
         process.exit(1);
     });

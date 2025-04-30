@@ -11,7 +11,7 @@ MCP3 provides a comprehensive suite of tools for interacting with the Sui blockc
 
 ### Claude Desktop Quick Start
 
-Add following to your claude desktop config 
+Add following to your claude desktop config
 ```
 {
   ...
@@ -31,13 +31,35 @@ Add following to your claude desktop config
 }
 ```
 
-### Use Cli
+### Use CLI
 
 For a list of available commands and options, run:
 ```
 npx @mcp3/sui --help
 ```
 
+#### Using the Tool Command
+
+MCP3 provides a unified `tool` command that organizes all tools from sub-projects as subcommands. To see all available tools, run:
+
+```
+npx @mcp3/sui tool
+```
+
+This will display a list of all available tools grouped by their prefix (e.g., sui-cetus, sui-wallets, etc.).
+
+To run a specific tool, use:
+
+```
+npx @mcp3/sui tool <tool-name> [options]
+```
+
+For example:
+
+```
+npx @mcp3/sui tool sui-wallets-list
+npx @mcp3/sui tool sui-cetus-pool-list
+```
 
 ## Packages
 
@@ -63,6 +85,37 @@ npx @mcp3/sui --help
 ## Development
 
 This project uses pnpm as the package manager and workspaces for managing the monorepo.
+
+### CLI Structure
+
+MCP3 uses a unified CLI structure where:
+
+1. All tools from sub-projects are registered as subcommands of a main `tool` command
+2. When no specific tool is named, the CLI automatically lists all available tools
+3. Tools are grouped by their prefix for better organization
+4. Tools are only accessible through the `tool` command
+
+When implementing new tools:
+
+1. Register your tool using `registration.addTool()` in your package
+2. Create a callback function that registers all tools in your package
+3. Pass this callback to the `startCli` function as the second parameter
+
+Example:
+
+```typescript
+// Create a callback function to register tools
+const registerTools = async (reg: Registration) => {
+    // Register your tools
+    registerYourTools(reg);
+};
+
+// Register tools immediately for the main CLI
+registerTools(registration);
+
+// Pass the callback to startCli
+startCli(registration, registerTools);
+```
 
 ### Prerequisites
 

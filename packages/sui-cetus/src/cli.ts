@@ -10,11 +10,15 @@ const registration = Registration.create("mcp3-sui-cetus", "Sui Cetus Protocol",
 // Add global options from sui-base
 addSuiGlobalOptions(registration);
 
-// Register Cetus tools and resources
-registerCetusTools(registration);
-registerCetusResource(registration);
+// Create a callback function to register tools
+const registerTools = async (reg: Registration) => {
+    // Register Cetus tools and resources
+    registerCetusTools(reg);
+    registerCetusResource(reg);
+};
 
-startCli(registration).catch(err => {
+
+startCli(registration, registerTools).catch(err => {
   console.error('Error in main:', err);
   process.exit(1);
 });

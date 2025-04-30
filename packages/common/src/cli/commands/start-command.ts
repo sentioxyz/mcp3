@@ -6,9 +6,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 
 
 export function registerStartCommand(
-  command: Command,
-  registration: Registration
-) {
+    command: Command, registration: Registration, registerToolCallback: (reg: Registration) => Promise<void>) {
 
   command.action(async (cmdOptions) => {
     const { verbose } = command.opts();
@@ -16,6 +14,7 @@ export function registerStartCommand(
       if (verbose) {
         console.error(chalk.blue(`Starting MCP server ...`));
       }
+      await registerToolCallback(registration);
       const server = new McpServer({
         name: 'MCP Server',
         version: '1.0.0',

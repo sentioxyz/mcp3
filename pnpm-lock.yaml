@@ -229,6 +229,9 @@ importers:
       '@mcp3/dex-screener':
         specifier: workspace:*
         version: link:../dex-screener
+      '@mcp3/sentio':
+        specifier: workspace:*
+        version: link:../sentio
       '@mcp3/sui-base':
         specifier: workspace:*
         version: link:../sui-base

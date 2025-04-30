@@ -10,10 +10,7 @@ const registration = Registration.create("mcp3-sui", "Sui Model Context Protocol
 addSuiGlobalOptions(registration);
 RegisterBase(registration);
 
-// Register sub-projects
-registerSubProjects(registration).then(() => {
-  startCli(registration).catch(err => {
-    console.error('Error in main:', err);
-    process.exit(1);
-  });
+startCli(registration, registerSubProjects).catch(err => {
+  console.error('Error in main:', err);
+  process.exit(1);
 });

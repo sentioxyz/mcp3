@@ -10,11 +10,14 @@ const registration = Registration.create("mcp3-sui-navi", "Sui Navi Protocol", "
 // Add global options from sui-base
 addSuiGlobalOptions(registration);
 
-// Register Navi tools and resources
-registerNaviTools(registration);
-registerNaviResource(registration);
+// Create a callback function to register tools
+const registerTools = async (reg: Registration) => {
+    // Register Navi tools and resources
+    registerNaviTools(reg);
+    registerNaviResource(reg);
+};
 
-startCli(registration).catch(err => {
+startCli(registration, registerTools).catch(err => {
     console.error('Error in main:', err);
     process.exit(1);
 });

@@ -34,7 +34,7 @@ function toResult(response: any): any {
  * Register all DexScreener tools with the Registration
  * @param registration The Registration instance
  */
-export function registerTools(registration: Registration) {
+export async function registerTools(registration: Registration) {
   // Token profile endpoints
   registration.addTool({
     name: 'dexscreener-get-token-profiles',

@@ -6,9 +6,14 @@ import * as dotenv from 'dotenv';
 import {Registration} from "../system.js";
 import {registerStartCommand} from "./commands/start-command.js";
 import {registerCommonTools} from "../tools/index.js";
+import {registerToolsAsSubcommands} from "./commands/tool-command.js";
 
 
-export async function startCli(registration: Registration) {
+export async function startCli(
+    registration: Registration,
+    registerToolsCallback: (reg: Registration) => Promise<void>,
+    registerGlobalOptionsCallback?: (reg: Registration) => void
+) {
     dotenv.config();
 
     let program = new Command()
@@ -26,12 +31,13 @@ export async function startCli(registration: Registration) {
         .description('Start the MCP server')
 
     startCommand = registration.bindServerOptions(startCommand);
-    registerStartCommand(startCommand, registration)
+    registerStartCommand(startCommand, registration, registerToolsCallback)
 
-    registration.registerToolAsCommands(program);
+    // Register tools as subcommands of the 'tool' command
+    registerToolsAsSubcommands(program, registration, registerToolsCallback);
 
     // Add other commands from subprojects
     registration.bindCommands(program);
 
-    program.parse(process.argv);
+    await program.parseAsync(process.argv);
 }
