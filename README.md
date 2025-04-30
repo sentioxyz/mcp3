@@ -1,5 +1,8 @@
 # MCP3 Monorepo
 
+[![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/sentioxyz/mcp3)
+
+
 This monorepo contains implementations of the Model Context Protocol for different blockchain networks, providing tools and services for blockchain data access and interaction.
 
 ## How to use MCP3 for SUI
