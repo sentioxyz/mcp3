@@ -14,16 +14,9 @@ export function registerGlobalOptions(registration: Registration) {
  * Register tools and resources for Sui Navi
  * @param registration The Registration instance
  */
-export function registerTools(registration: Registration) {
+export async function registerTools(registration: Registration) {
   registerNaviTools(registration);
   registerNaviResource(registration);
 }
 
-/**
- * Register both global options and tools for Sui Navi
- * @param registration The Registration instance
- */
-export function register(registration: Registration) {
-  registerGlobalOptions(registration);
-  registerTools(registration);
-}
+

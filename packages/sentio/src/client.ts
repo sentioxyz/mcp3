@@ -1,5 +1,5 @@
 import {createClient} from "@hey-api/client-fetch";
-import {WebService} from "@sentio/api";
+import {DataService, WebService} from "@sentio/api";
 
 /**
  * Interface for Sentio endpoint
@@ -121,15 +121,61 @@ export class SentioClient {
     async callEndpoint(url: string, params: Record<string, any> = {}) {
         try {
             // Make the request
-            const response = await this.client.post({
-                url,
-                body: params
+            const u = new URL(url);
+            const client = createClient({baseUrl: u.origin});
+            client.interceptors.request.use((config) => {
+                if (this.apiKey) {
+                    config.headers.set("api-key", `${this.apiKey}`);
+                }
+                return config;
+            })
+            const response = await client.post({
+                url: u.pathname.toString(),
+                body: params,
             });
+            if (!response.response.ok) {
+                throw new Error(`Failed to call endpoint ${url}: ${response.error}`);
+            }
 
             return response.data;
         } catch (error) {
             throw new Error(`Failed to call endpoint ${url}: ${error instanceof Error ? error.message : String(error)}`);
         }
+    }
+
+    async getTables(project: string) {
+        const [owner, slug] = project.split("/")
+        const p = await this.getProject(owner, slug);
+        if (!p) {
+            throw new Error(`Failed to get project ${project}`);
+        }
+        const response = await this.client.get({
+            url: `/api/v1/analytics/${p.ownerName}/${p.slug}/sql/tables?projectId=${p.id}&includeChains=true&includeViews=true&includeExternals=true`,
+        });
+        return response.data as any[];
+    }
+
+    async executeSQL(project: string, sql: string, limit: number, cursor?: string) {
+        const [owner, slug] = project.split("/")
+
+        const res = await DataService.executeSql({
+            path: {
+                owner,
+                slug
+            },
+            body: {
+                sqlQuery: {
+                    sql,
+                    size: limit
+                },
+                cursor
+            },
+            client: this.client
+        })
+        if (res.error) {
+            throw new Error(`Failed to execute SQL: ${res.error}`);
+        }
+        return res.data;
     }
 }
 

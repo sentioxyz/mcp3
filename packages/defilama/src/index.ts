@@ -1,6 +1,7 @@
 // Export core functionality
 import {Registration} from "@mcp3/common";
 import {registerTools} from "./tools/index.js";
+
 export {registerTools} from "./tools/index.js";
 
 /**
@@ -13,12 +14,3 @@ export function registerGlobalOptions(registration: Registration) {
     });
 }
 
-
-/**
- * Register both global options and tools for DeFiLlama
- * @param registration The Registration instance
- */
-export function register(registration: Registration) {
-    registerGlobalOptions(registration);
-    registerTools(registration);
-}

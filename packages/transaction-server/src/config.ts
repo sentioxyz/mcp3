@@ -7,7 +7,7 @@ export interface ServerConfig {
 // Default server configuration
 export const DEFAULT_CONFIG: ServerConfig = {
   address: 'localhost',
-  port: 3000
+  port: 3001
 };
 
 /**

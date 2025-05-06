@@ -1,6 +1,7 @@
 import {Registration} from '@mcp3/common';
 import {z} from 'zod';
-import {ConfigFileWalletPersistence, WalletInfo, WalletManager} from '../manager/index.js';
+import {WalletInfo, WalletManager} from "../manager/wallet-manager.js";
+import {ConfigFileWalletPersistence} from "../manager/persistence/config-file-persistence.js";
 
 
 /**

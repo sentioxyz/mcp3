@@ -8,10 +8,11 @@
     "sui-wallets": "build/cli.js"
   },
   "scripts": {
+    "prebuild": "pnpm run clean",
     "build": "tsc",
     "start": "node build/cli.js",
     "dev": "ts-node src/cli.ts",
-    "clean": "rm -rf build",
+    "clean": "rm -rf build *.tsbuildinfo",
     "test": "glob -c 'tsx --test' '**/*.test.ts'"
   },
   "keywords": [
@@ -25,6 +26,7 @@
   "license": "MIT",
   "dependencies": {
     "@mcp3/common": "workspace:*",
+    "@mcp3/sui-base": "workspace:*",
     "@mcp3/transaction-server": "workspace:*",
     "@mysten/sui": "~1.24.0",
     "@scure/bip39": "^1.2.2",

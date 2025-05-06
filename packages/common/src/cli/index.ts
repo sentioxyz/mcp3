@@ -7,12 +7,12 @@ import {Registration} from "../system.js";
 import {registerStartCommand} from "./commands/start-command.js";
 import {registerCommonTools} from "../tools/index.js";
 import {registerToolsAsSubcommands} from "./commands/tool-command.js";
+import {registerServeCommand} from "./commands/serve-command.js";
 
 
 export async function startCli(
     registration: Registration,
-    registerToolsCallback: (reg: Registration) => Promise<void>,
-    registerGlobalOptionsCallback?: (reg: Registration) => void
+    registerToolsCallback: (reg: Registration) => Promise<void>
 ) {
     dotenv.config();
 
@@ -35,7 +35,8 @@ export async function startCli(
 
     // Register tools as subcommands of the 'tool' command
     registerToolsAsSubcommands(program, registration, registerToolsCallback);
-
+    // Register serve command
+    registerServeCommand(program, registration, registerToolsCallback);
     // Add other commands from subprojects
     registration.bindCommands(program);
 
