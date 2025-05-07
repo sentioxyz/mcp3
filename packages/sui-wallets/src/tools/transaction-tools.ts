@@ -1,6 +1,6 @@
 import { Registration, transactionStore } from '@mcp3/common';
 import { z } from 'zod';
-import { WalletManager } from '../manager/index.js';
+import { WalletManager } from '../manager/wallet-manager.js';
 import { Transaction } from '@mysten/sui/transactions';
 import { TransactionServerClient, getServerUrl } from '@mcp3/transaction-server';
 

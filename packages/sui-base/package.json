@@ -31,8 +31,6 @@
     "@types/node": "^20.8.9",
     "typescript": "^5.2.2",
     "tsx": "^4.15.2"
-  },
-  "peerDependencies": {
-    "@mcp3/sui-wallets": "workspace:*"
   }
+
 }

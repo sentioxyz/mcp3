@@ -1,5 +1,5 @@
 import {Registration} from '@mcp3/common';
-import {WalletManager} from '../manager/index.js';
+import {WalletManager} from "../manager/wallet-manager.js";
 import {toWalletResource} from "../tools/wallet-management-tools.js";
 
 /**

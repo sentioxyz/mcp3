@@ -2,14 +2,18 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import {Registration} from "../../system.js";
 import {McpServer} from "@modelcontextprotocol/sdk/server/mcp.js";
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import {  SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
+import express from "express";
+import {Server} from "node:net";
 
 
-export function registerStartCommand(
+export function registerServeCommand(
     command: Command, registration: Registration, registerToolCallback: (reg: Registration) => Promise<void>) {
 
+  command.option('-p, --port <port>', 'Port to listen on', '3000');
+
   command.action(async (cmdOptions) => {
-    const { verbose } = command.opts();
+    const { port, verbose } = command.opts();
     try {
       if (verbose) {
         console.error(chalk.blue(`Starting MCP server ...`));
@@ -21,15 +25,25 @@ export function registerStartCommand(
         description: 'Model Context Protocol server',
       });
 
+      const app = express();
+
       registration.bindServer(server, cmdOptions);
-      const transport = new StdioServerTransport();
-      await server.connect(transport);
-      console.error('Sui MCP server started on stdio');
-      registration.afterServerStart(cmdOptions);
-      transport.onclose = () => {
-        console.error('Sui MCP server stopped');
-        registration.closeServer();
-      }
+
+      let transport: SSEServerTransport | null = null;
+      app.get("/sse", (req, res) => {
+        transport = new SSEServerTransport("/messages", res);
+        server.connect(transport);
+      });
+
+      app.post("/messages", (req, res) => {
+        if (transport) {
+          transport.handlePostMessage(req, res);
+        }
+      });
+      app.listen(port, () => {
+        console.error('Sui MCP server started through SSE on port ' + port);
+        registration.afterServerStart(cmdOptions);
+      });
     } catch (error) {
       console.error(chalk.red(`Failed to start MCP server: ${error instanceof Error ? error.message : String(error)}`));
       process.exit(1);

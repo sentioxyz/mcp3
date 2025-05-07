@@ -1,7 +1,6 @@
 import {z} from 'zod';
 import {SuiClient} from '@mysten/sui/client';
 import {Registration} from "@mcp3/common";
-import {getDefaultWalletAddress} from "../address.js";
 
 // Define a type for the WalletManager to avoid direct import dependency
 interface WalletManagerLike {
@@ -19,16 +18,14 @@ export function registerBalanceTool(registration: Registration) {
         name: 'sui-get-balance',
         description: 'Get the balance of a specific coin type for a wallet address',
         args: {
-            owner: z.string().optional().describe('The wallet address to check (defaults to configured wallet)'),
+            owner: z.string().describe('The wallet address to check'),
             coinType: z.string().describe('The coin type to check (e.g., 0x2::sui::SUI)').optional()
         },
         callback: async ({ owner, coinType }, extra) => {
             try {
                 const client = new SuiClient({ url: registration.globalOptions.nodeUrl });
-                // Resolve the wallet address
-                const walletManager = await getDefaultWalletAddress(registration);
-                const defaultWallet = walletManager?.getDefaultWallet();
-                const walletAddress = owner ?? defaultWallet?.address;
+
+                const walletAddress = owner
 
                 if (!walletAddress) {
                     return {
@@ -79,15 +76,12 @@ export function registerBalanceTool(registration: Registration) {
         name: 'sui-get-all-balances',
         description: 'Get all coin balances for a wallet address',
         args: {
-            owner: z.string().optional().describe('The wallet address to check (defaults to configured wallet)')
+            owner: z.string().describe('The wallet address to check')
         },
         callback: async ({ owner }, extra) => {
             try {
                 const client = new SuiClient({ url: registration.globalOptions.nodeUrl });
-                // Resolve the wallet address
-                const walletManager = await getDefaultWalletAddress(registration);
-                const defaultWallet = walletManager?.getDefaultWallet();
-                const walletAddress = owner ?? defaultWallet?.address;
+                const walletAddress = owner
 
                 if (!walletAddress) {
                     return {
@@ -138,18 +132,14 @@ export function registerBalanceTool(registration: Registration) {
         name: 'sui-get-coins',
         description: 'Get detailed information about coins owned by a wallet address',
         args: {
-            owner: z.string().optional().describe('The wallet address to check (defaults to configured wallet)'),
+            owner: z.string().describe('The wallet address to check'),
             coinType: z.string().optional().describe('The coin type to filter by (optional)'),
             limit: z.number().optional().describe('Maximum number of coins to return')
         },
         callback: async ({ owner, coinType, limit }, extra) => {
             try {
                 const client = new SuiClient({ url: registration.globalOptions.nodeUrl });
-                // Resolve the wallet address
-                const walletManager = await getDefaultWalletAddress(registration);
-                const defaultWallet = walletManager?.getDefaultWallet();
-                const walletAddress = owner ?? defaultWallet?.address;
-
+                const walletAddress = owner
                 if (!walletAddress) {
                     return {
                         content: [{

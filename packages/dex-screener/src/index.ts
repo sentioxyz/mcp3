@@ -1,13 +1,17 @@
 // Export core functionality
 import { Registration } from "@mcp3/common";
-import { registerTools } from "./tools/index.js";
+
+export { registerTools } from "./tools/index.js";
 
 export * from "./client.js";
 
 /**
- * Register all DexScreener tools with the Registration
+ * Register DexScreener global options with the Registration
  * @param registration The Registration instance
  */
-export function register(registration: Registration) {
-  registerTools(registration);
+export function registerGlobalOptions(registration: Registration) {
+  registration.addGlobalOption((command) => {
+    command.option("--dexscreener-endpoint <endpoint>", "DexScreener API endpoint", "https://api.dexscreener.com");
+  });
 }
+

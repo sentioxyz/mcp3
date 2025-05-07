@@ -7,9 +7,11 @@ import {Transaction} from '@mysten/sui/transactions';
 import {fromBase64} from '@mysten/sui/utils';
 import * as bip39 from '@scure/bip39';
 import {wordlist} from '@scure/bip39/wordlists/english';
-import {ConfigFileWalletPersistence, EnvVarWalletPersistence, WalletPersistence} from './persistence/index.js';
 
 import {SuiTransactionBlockResponse} from "@mysten/sui/client";
+import {WalletPersistence} from "./persistence/wallet-persistence.js";
+import {EnvVarWalletPersistence} from "./persistence/env-var-persistence.js";
+import {ConfigFileWalletPersistence} from "./persistence/config-file-persistence.js";
 
  /**
  * Interface for wallet credentials

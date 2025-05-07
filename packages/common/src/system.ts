@@ -10,9 +10,6 @@ import {z, ZodRawShape, ZodTypeAny} from "zod";
 import {CallToolResult, ServerNotification, ServerRequest} from "@modelcontextprotocol/sdk/types.js";
 import {RequestHandlerExtra} from "@modelcontextprotocol/sdk/shared/protocol.js";
 
-
-
-
 type CommandFn = (command: Command) => void;
 
 interface ToolWithArgs<Args extends ZodRawShape> {
@@ -291,6 +288,10 @@ export class Registration {
                 process.exit(0)
             });
         }
+    }
+
+    getAllTools() {
+        return this.tools;
     }
 
     get globalOptions() {

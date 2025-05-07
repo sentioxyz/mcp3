@@ -9,7 +9,7 @@ import {withCachedResult} from "../cache.js";
  * Register all DeFiLlama tools with the Registration
  * @param registration The Registration instance
  */
-export function registerTools(registration: Registration) {
+export async function registerTools(registration: Registration) {
 
     // Protocol endpoints
     registration.addTool({

@@ -1,10 +1,9 @@
 #!/usr/bin/env node
 
 import {Registration, startCli} from "@mcp3/common";
-import {registerGlobalOptions} from "./index.js";
-import {registerTools} from "./tools/index.js";
+import {registerTools, registerGlobalOptions} from "./index.js";
 
-const registration = Registration.create("mcp3-sui-defilama", "DeFiLlama API Integration", "1.0.2");
+const registration = Registration.create("mcp3-sentio", "Sentio API Integration", "1.0.0");
 
 // Register global options
 registerGlobalOptions(registration);
