@@ -1,6 +1,6 @@
 {
   "name": "@mcp3/dex-screener",
-  "version": "1.0.5",
+  "version": "1.0.6-rc.1",
   "description": "DexScreener API integration for MCP3",
   "main": "build/index.js",
   "type": "module",

@@ -1,6 +1,6 @@
 {
   "name": "@mcp3/sui",
-  "version": "1.0.15",
+  "version": "1.0.16-rc.1",
   "description": "Model Context Protocol implementation for Sui Network",
   "main": "build/cli/index.js",
   "type": "module",

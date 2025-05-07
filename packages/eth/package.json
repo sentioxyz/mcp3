@@ -1,6 +1,6 @@
 {
   "name": "@mcp3/eth",
-  "version": "1.0.4",
+  "version": "1.0.5-rc.1",
   "description": "Ethereum Model Context Protocol implementation",
   "main": "build/index.js",
   "bin": {
