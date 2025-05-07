@@ -8,7 +8,7 @@ import {Server} from "node:net";
 
 
 export function registerServeCommand(
-    command: Command, registration: Registration, registerToolCallback: (reg: Registration) => Promise<void>) {
+    command: Command, registration: Registration, registerToolCallback: (reg: Registration) => Promise<void> | void) {
 
   command.option('-p, --port <port>', 'Port to listen on', '3000');
 

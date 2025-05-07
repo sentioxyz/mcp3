@@ -12,7 +12,7 @@ import {registerServeCommand} from "./commands/serve-command.js";
 
 export async function startCli(
     registration: Registration,
-    registerToolsCallback: (reg: Registration) => Promise<void>
+    registerToolsCallback: (reg: Registration) => Promise<void> | void
 ) {
     dotenv.config();
 

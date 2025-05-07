@@ -6,7 +6,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 
 
 export function registerStartCommand(
-    command: Command, registration: Registration, registerToolCallback: (reg: Registration) => Promise<void>) {
+    command: Command, registration: Registration, registerToolCallback: (reg: Registration) => Promise<void> | void) {
 
   command.action(async (cmdOptions) => {
     const { verbose } = command.opts();
