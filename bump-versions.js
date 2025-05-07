@@ -15,8 +15,8 @@ let releaseType = 'patch'; // Default release type
 args.forEach(arg => {
   if (arg.startsWith('--type=')) {
     releaseType = arg.split('=')[1];
-    if (!['patch', 'minor', 'major'].includes(releaseType)) {
-      console.error(`Invalid release type: ${releaseType}. Must be one of: patch, minor, major`);
+    if (!['patch', 'minor', 'major', 'rc'].includes(releaseType)) {
+      console.error(`Invalid release type: ${releaseType}. Must be one of: patch, minor, major, rc`);
       process.exit(1);
     }
   }
@@ -138,10 +138,29 @@ packageJsonFiles.forEach(file => {
   
   // Parse version components
   const [major, minor, patch] = currentVersion.split('.').map(Number);
-  
+  let preRelease = '';
+  let preReleaseNum = 0;
+
+  // Check if current version has a prerelease component
+  if (currentVersion.includes('-')) {
+    const [version, preReleaseInfo] = currentVersion.split('-');
+    if (preReleaseInfo.startsWith('rc.')) {
+      preRelease = 'rc';
+      preReleaseNum = parseInt(preReleaseInfo.substring(3), 10) || 0;
+    }
+  }
+
   // Calculate new version based on release type
   let newVersion;
-  if (releaseType === 'major') {
+  if (releaseType === 'rc') {
+    if (preRelease === 'rc') {
+      // Increment the RC number
+      newVersion = `${major}.${minor}.${patch}-rc.${preReleaseNum + 1}`;
+    } else {
+      // Create a new RC for the next patch version
+      newVersion = `${major}.${minor}.${patch + 1}-rc.1`;
+    }
+  } else if (releaseType === 'major') {
     newVersion = `${major + 1}.0.0`;
   } else if (releaseType === 'minor') {
     newVersion = `${major}.${minor + 1}.0`;
