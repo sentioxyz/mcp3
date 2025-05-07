@@ -237,7 +237,8 @@ export class Registration {
                     const result = await tool.callback(processedOptions, {
                         signal: controller.signal,
                         sendNotification,
-                        sendRequest
+                        sendRequest,
+                        requestId: "cli"
                     });
                     if (result && result.content) {
                         // Check if the content is an array with a single item

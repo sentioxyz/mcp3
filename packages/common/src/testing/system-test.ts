@@ -78,6 +78,7 @@ export class TestRegistration extends Registration {
             signal: new AbortController().signal,
             sendRequest,
             sendNotification,
+            requestId: "test"
         };
 
         const mergedExtra = {...defaultExtra, ...extra};
