@@ -1,7 +1,7 @@
 import {Command} from "commander";
 import {Registration} from "../../system.js";
 
-export function registerToolsAsSubcommands(program: Command, registration: Registration, registerToolCallback: (reg: Registration) => Promise<void>) {
+export function registerToolsAsSubcommands(program: Command, registration: Registration, registerToolCallback: (reg: Registration) => Promise<void> | void) {
     // Create a main 'tool' command
     const toolCommand = program.command('tool')
         .description('Execute or list available tools')

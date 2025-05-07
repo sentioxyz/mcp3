@@ -1,10 +1,12 @@
 name: Release
 
 on:
+  push:
+    branches: [ "main" ]
   workflow_dispatch:
     inputs:
       releaseType:
-        description: 'Release type (patch, minor, major)'
+        description: 'Release type (patch, minor, major, rc)'
         required: true
         default: 'patch'
         type: choice
@@ -12,6 +14,7 @@ on:
           - patch
           - minor
           - major
+          - rc
 
 jobs:
   release:
@@ -69,27 +72,38 @@ jobs:
           git config --global user.name "GitHub Actions Bot"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
+      - name: Determine release type
+        id: release-type
+        run: |
+          # Default to rc for push events, use input for manual workflow
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            echo "RELEASE_TYPE=rc" >> $GITHUB_ENV
+          else
+            echo "RELEASE_TYPE=${{ github.event.inputs.releaseType }}" >> $GITHUB_ENV
+          fi
+          echo "Using release type: $RELEASE_TYPE"
+
       - name: Bump versions of changed packages
         id: version-bump
         run: |
-          # Get release type from workflow input or use patch as default
-          RELEASE_TYPE="${{ github.event.inputs.releaseType || 'patch' }}"
-          echo "Using release type: $RELEASE_TYPE"
-          
-          # Run the version bump script
+          # Run the version bump script with determined release type
           node ./bump-versions.js --type=$RELEASE_TYPE
 
       - name: Commit version changes
         run: |
           git add .
-          git commit -m "chore: bump versions"
+          git commit -m "chore: bump versions [skip ci]"
           git push
 
       - name: Publish to NPM
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          pnpm publish -r --no-git-checks --access public
+          if [[ "$RELEASE_TYPE" == "rc" ]]; then
+            pnpm publish -r --no-git-checks --access public --tag next
+          else
+            pnpm publish -r --no-git-checks --access public
+          fi
 
       - name: Create release tags
         run: |
