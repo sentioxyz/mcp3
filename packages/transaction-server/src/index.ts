@@ -9,14 +9,16 @@ export { TransactionServerClient } from './client.js';
 export { setServerUrl, getServerUrl } from './utils.js';
 import {Option} from "commander";
 
-export function register(registration: Registration) {
-    registration.addServeOption((command) => {
+export function registerGlobalOptions(registration: Registration) {
+    registration.addGlobalOption((command) => {
         command.option('-t, --enable-transaction-server', 'Start the transaction server for signing transactions', false);
         command.option('--transaction-server-url <url>', 'The url of transaction server', 'https://tx.mcp3.ai');
         command.addOption(new Option("--transaction-server-port <port>", "Port to listen on")
-             .default(3000));
-    });
+            .default(3000));
+    })
+}
 
+export function register(registration: Registration) {
 
     registration.onServerStart(async (options) => {
         const enabled = options.enableTransactionServer || false

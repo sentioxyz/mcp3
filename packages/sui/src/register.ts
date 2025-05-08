@@ -6,6 +6,7 @@ import * as cetus from "@mcp3/sui-cetus";
 import * as defilama from "@mcp3/defilama";
 import * as dexScreener from "@mcp3/dex-screener";
 import * as sentio from "@mcp3/sentio";
+import * as transactionServer from "@mcp3/transaction-server";
 
 export async function registerSubProjectTools(registration: Registration) {
     await wallets.registerTools(registration);
@@ -14,6 +15,7 @@ export async function registerSubProjectTools(registration: Registration) {
     await defilama.registerTools(registration);
     await dexScreener.registerTools(registration);
     await sentio.registerTools(registration);
+    await transactionServer.register(registration);
 }
 
 export function registerSubProjectOptions(registration: Registration) {
@@ -23,4 +25,5 @@ export function registerSubProjectOptions(registration: Registration) {
     defilama.registerGlobalOptions(registration);
     dexScreener.registerGlobalOptions(registration);
     sentio.registerGlobalOptions(registration);
+    transactionServer.registerGlobalOptions(registration);
 }
