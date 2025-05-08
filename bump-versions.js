@@ -14,10 +14,17 @@ let releaseType = 'patch'; // Default release type
 
 args.forEach(arg => {
   if (arg.startsWith('--type=')) {
-    releaseType = arg.split('=')[1];
-    if (!['patch', 'minor', 'major', 'rc'].includes(releaseType)) {
-      console.error(`Invalid release type: ${releaseType}. Must be one of: patch, minor, major, rc`);
-      process.exit(1);
+    const providedType = arg.split('=')[1];
+    // If the type is empty or undefined, keep the default
+    if (providedType) {
+      releaseType = providedType;
+      // Validate the release type
+      if (!['patch', 'minor', 'major', 'rc'].includes(releaseType)) {
+        console.error(`Invalid release type: ${releaseType}. Must be one of: patch, minor, major, rc`);
+        process.exit(1);
+      }
+    } else {
+      console.log('Empty release type provided, using default: patch');
     }
   }
 });
@@ -42,12 +49,12 @@ if (lastTag) {
       .trim()
       .split('\n')
       .filter(file => file.startsWith('packages/'));
-    
+
     changedFiles.forEach(file => {
       const packagePath = file.split('/').slice(0, 2).join('/');
       changedPackages.add(packagePath);
     });
-    
+
     console.log(`Detected changes in the following packages:`);
     changedPackages.forEach(pkg => console.log(`- ${pkg}`));
   } catch (error) {
@@ -72,7 +79,7 @@ packageJsonFiles.forEach(file => {
   const packageName = packageJson.name;
   dependencyGraph[packageName] = [];
   packageVersions[packageName] = packageJson.version;
-  
+
   // Check for workspace dependencies
   if (packageJson.dependencies) {
     Object.keys(packageJson.dependencies).forEach(dep => {
@@ -81,7 +88,7 @@ packageJsonFiles.forEach(file => {
       }
     });
   }
-  
+
   if (packageJson.peerDependencies) {
     Object.keys(packageJson.peerDependencies).forEach(dep => {
       if (packageJson.peerDependencies[dep].startsWith('workspace:')) {
@@ -97,7 +104,7 @@ const packagesToUpdate = new Set();
 function markForUpdate(packageName) {
   if (packagesToUpdate.has(packageName)) return;
   packagesToUpdate.add(packageName);
-  
+
   // Find packages that depend on this package
   Object.keys(dependencyGraph).forEach(pkg => {
     if (dependencyGraph[pkg].includes(packageName)) {
@@ -119,6 +126,7 @@ changedPackages.forEach(pkgPath => {
   }
 });
 
+
 console.log('\nThe following packages will be updated:');
 packagesToUpdate.forEach(pkg => {
   console.log(`- ${pkg}`);
@@ -128,26 +136,39 @@ packagesToUpdate.forEach(pkg => {
 packageJsonFiles.forEach(file => {
   const packageJson = JSON.parse(fs.readFileSync(file, 'utf8'));
   const packageName = packageJson.name;
-  
+
   if (!packagesToUpdate.has(packageName)) {
     console.log(`Skipping ${packageName} (no changes detected)`);
     return;
   }
-  
+
   const currentVersion = packageJson.version;
-  
+
   // Parse version components
-  const [major, minor, patch] = currentVersion.split('.').map(Number);
+  const versionParts = currentVersion.split('.');
+  // Ensure we have valid numbers for each part, defaulting to 0 if NaN
+  const major = parseInt(versionParts[0], 10) || 0;
+  const minor = parseInt(versionParts[1], 10) || 0;
+
+  // Handle patch version which might contain pre-release info
+  let patch = 0;
   let preRelease = '';
   let preReleaseNum = 0;
 
   // Check if current version has a prerelease component
   if (currentVersion.includes('-')) {
     const [version, preReleaseInfo] = currentVersion.split('-');
-    if (preReleaseInfo.startsWith('rc.')) {
+    // Extract patch from the version part
+    const versionParts = version.split('.');
+    patch = parseInt(versionParts[2], 10) || 0;
+
+    if (preReleaseInfo && preReleaseInfo.startsWith('rc.')) {
       preRelease = 'rc';
       preReleaseNum = parseInt(preReleaseInfo.substring(3), 10) || 0;
     }
+  } else {
+    // No pre-release, just extract patch
+    patch = parseInt(versionParts[2], 10) || 0;
   }
 
   // Calculate new version based on release type
@@ -167,9 +188,9 @@ packageJsonFiles.forEach(file => {
   } else { // patch
     newVersion = `${major}.${minor}.${patch + 1}`;
   }
-  
+
   packageJson.version = newVersion;
-  
+
   // Update dependencies to other workspace packages
   if (packageJson.dependencies) {
     Object.keys(packageJson.dependencies).forEach(dep => {
@@ -179,10 +200,10 @@ packageJsonFiles.forEach(file => {
       }
     });
   }
-  
+
   // Write updated package.json
   fs.writeFileSync(file, JSON.stringify(packageJson, null, 2) + '\n');
-  
+
   console.log(`✅ ${packageName}: ${currentVersion} -> ${newVersion}`);
 });
 
