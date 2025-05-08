@@ -1,6 +1,6 @@
 {
   "name": "@mcp3/sui-navi",
-  "version": "1.0.6-rc.1",
+  "version": "1.0.6",
   "description": "Navi Protocol integration for Sui Network in MCP3",
   "main": "build/index.js",
   "type": "module",

@@ -1,19 +1,19 @@
 {
   "name": "@mcp3/transaction-server",
-  "version": "1.0.NaN-rc.2",
+  "version": "1.0.0",
   "description": "Transaction server for handling transactions and serving transaction UI",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
   "type": "module",
   "bin": {
-    "transaction-server": "./dist/cli.js"
+    "transaction-server": "./build/cli.js"
   },
   "scripts": {
-    "build": "tsc && chmod +x dist/cli.js",
-    "start": "node dist/cli.js start",
+    "build": "tsc && chmod +x build/cli.js",
+    "start": "node build/cli.js start",
     "dev": "ts-node src/cli.ts start",
-    "clean": "rm -rf dist",
-    "prepublishOnly": "npm run clean && npm run build"
+    "clean": "rm -rf build *.tsbuildinfo",
+    "prepublishOnly": "pnpm run clean && pnpm run build"
   },
   "keywords": [
     "sui",

@@ -15,7 +15,6 @@ export async function registerSubProjectTools(registration: Registration) {
     await defilama.registerTools(registration);
     await dexScreener.registerTools(registration);
     await sentio.registerTools(registration);
-    await transactionServer.register(registration);
 }
 
 export function registerSubProjectOptions(registration: Registration) {
@@ -25,5 +24,4 @@ export function registerSubProjectOptions(registration: Registration) {
     defilama.registerGlobalOptions(registration);
     dexScreener.registerGlobalOptions(registration);
     sentio.registerGlobalOptions(registration);
-    transactionServer.registerGlobalOptions(registration);
 }
