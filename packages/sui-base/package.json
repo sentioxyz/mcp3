@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "clean": "rm -rf build",
+    "clean": "rm -rf build *.tsbuildinfo",
     "test": "glob -c 'tsx --test' '**/*.test.ts'"
   },
   "keywords": [

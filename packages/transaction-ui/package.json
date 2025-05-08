@@ -26,6 +26,7 @@
     "build": "tsc -b && vite build",
     "prepublishOnly": "rm -rf dist && npm run build",
     "lint": "eslint .",
+    "clean": "rm -rf dist",
     "preview": "vite preview"
   },
   "keywords": [

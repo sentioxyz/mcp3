@@ -11,7 +11,7 @@
     "build": "tsc",
     "start": "node build/cli.js",
     "dev": "ts-node src/cli.ts",
-    "clean": "rm -rf build"
+    "clean": "rm -rf build *.tsbuildinfo"
   },
   "keywords": [
     "sentio",

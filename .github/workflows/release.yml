@@ -90,6 +90,7 @@ jobs:
           node ./bump-versions.js --type=$RELEASE_TYPE
 
       - name: Commit version changes
+        if: ${{ env.RELEASE_TYPE != 'rc' }}
         run: |
           git add .
           git commit -m "chore: bump versions [skip ci]"
@@ -106,6 +107,7 @@ jobs:
           fi
 
       - name: Create release tags
+        if: ${{ env.RELEASE_TYPE != 'rc' }}
         run: |
           # Make the script executable
           chmod +x ./create-release-tags.js
