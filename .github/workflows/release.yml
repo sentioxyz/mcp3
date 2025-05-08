@@ -35,13 +35,13 @@ jobs:
         with:
           node-version: 20
           registry-url: 'https://registry.npmjs.org'
-          
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
           version: 8
           run_install: false
-      
+
       - name: Get pnpm store directory
         id: pnpm-cache
         shell: bash
@@ -87,6 +87,9 @@ jobs:
         id: version-bump
         run: |
           # Run the version bump script with determined release type
+          if [ -z "$RELEASE_TYPE" ]; then
+            RELEASE_TYPE="rc"
+          fi
           node ./bump-versions.js --type=$RELEASE_TYPE
 
       - name: Commit version changes
