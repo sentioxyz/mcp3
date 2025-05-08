@@ -1,6 +1,6 @@
 {
   "name": "@mcp3/defilama",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "DeFiLlama API integration for MCP3",
   "main": "build/index.js",
   "type": "module",
