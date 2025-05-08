@@ -27,7 +27,7 @@ export class TransactionServerClient {
       throw new Error(`Failed to register transaction: ${errorText}`);
     }
 
-    return await response.json();
+    return await response.json() as { txId: string; url: string };
   }
 
   /**
@@ -43,6 +43,6 @@ export class TransactionServerClient {
       throw new Error(`Failed to get transaction: ${errorText}`);
     }
 
-    return await response.json();
+    return await response.json() as { txId: string; txBytes: string };
   }
 }
