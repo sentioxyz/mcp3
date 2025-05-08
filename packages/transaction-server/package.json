@@ -13,7 +13,7 @@
     "start": "node dist/cli.js start",
     "dev": "ts-node src/cli.ts start",
     "clean": "rm -rf dist",
-    "prepublishOnly": "npm run clean && npm run build"
+    "prepublishOnly": "pnpm run clean && pnpm run build"
   },
   "keywords": [
     "sui",
