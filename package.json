@@ -17,12 +17,13 @@
   "author": "",
   "license": "ISC",
   "engines": {
-    "node": ">=18",
+    "node": ">=26",
     "pnpm": ">=8"
   },
   "devDependencies": {
     "glob": "^11.0.1",
     "typescript": "^5.2.2",
     "tsx": "^4.15.2"
-  }
+  },
+  "packageManager": "pnpm@8.15.9"
 }

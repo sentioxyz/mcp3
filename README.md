@@ -119,8 +119,8 @@ startCli(registration, registerTools);
 
 ### Prerequisites
 
-- Node.js (v18 or higher)
-- pnpm (v8 or higher)
+- Node.js (v26 or higher)
+- pnpm 8.15.9
 
 ### Setup
 
